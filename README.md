@@ -1,71 +1,100 @@
-# VesperNode v27 — Equipment-Aware Framing
+# Light from Afar v32 — Efficient Repair + Workflow Polish
 
-This version builds on v21's Session Log improvements and improves how the saved imaging setup informs framing and exposure guidance.
+Built directly from the supplied `astralog-v27.zip` baseline. This pass is intentionally surgical: existing features, UI structure, and local storage keys are preserved; only regressions and explicitly requested UI behavior were repaired.
 
-## Equipment-aware framing
-- Uses focal length and sensor width/height to calculate the actual angular field of view, plus focal ratio and image scale when the relevant values are supplied.
-- The target details view uses SIMBAD's catalogued major axis, minor axis, and position angle (when available) to estimate the target's projected size at the selected camera rotation.
-- Framing advice checks both frame dimensions and uses a 10% margin when the catalogued position angle is available. When it is not available, it reports a conservative major-axis check instead of pretending to know the orientation.
-- Changing camera rotation updates the framing estimate, and the FOV overlay uses that rotation. The overlay requires focal length and both sensor dimensions.
-- The text notes that catalogue sizes can omit faint outer structures; the fit estimate is a planning aid, not a guarantee of the final image composition.
+## Repairs
+- Restored working Marks sidebar toggle by removing the duplicate generic sidebar listener.
+- Restored Map window toggle by removing the duplicate Map handler and keeping one authoritative handler.
+- Preserved Aladin survey switching and local survey selection.
+- Made bottom action buttons consistently highlight while their windows are open and clear when closed.
+- Added Profile active state while its account/observer window is open.
+- Added missing Settings window state and sidebar active state.
+- Made Target Info immediately useful from the saved mark, then enrich it with SIMBAD when available.
+- Styled Gallery search/filter controls to match the existing field/search language used elsewhere in the app.
+- Updated visible product branding from AstraLog to Light from Afar without changing internal storage keys or existing feature names.
 
-## Mount-aware exposure advice
-- Tripod-only setups can receive a rough NPF-rule untracked exposure estimate when focal length, aperture, and pixel size are provided.
-- Star trackers and equatorial mounts are treated as tracking setups; actual limits still depend on alignment, guiding, and mount performance.
-- Alt-azimuth mounts are treated as tracking-capable, but the app explicitly warns that field rotation may limit longer exposures.
+## Preservation
+This build starts from v27. No community, gallery, planning, observing, optical-train, Alpaca, HZ, marks, or session-log features were intentionally removed.
 
-## Session Log (from v21)
-- Search, edit, and delete saved sessions.
-- Record seeing, transparency, cloud cover, and guiding RMS.
-- Export CSV and JSON backups; import JSON backups with record validation and ID-based merging.
-
-## Data and offline note
-Settings, marks, and sessions remain in browser local storage on that device. JSON export/import is a manual backup, not cloud sync. The service worker is available only when served from a supported HTTP/HTTPS origin. External sky/catalogue services are not made fully offline by this version.
-
-## Validation performed
-- JavaScript syntax check (`node --check` on extracted inline script).
-- Duplicate HTML ID check.
-- ZIP archive integrity test.
-- Static checks for mount-aware guidance, camera-rotation refresh, and SIMBAD size/position-angle fields.
-
-No claim is made that every browser interaction was tested live in this environment.
+## Validation
+- JavaScript syntax check: passed.
+- HTML IDs: 246 total, 246 unique.
+- Map click handlers: 1.
+- Marks sidebar click handlers: 1.
+- ZIP integrity: passed.
+- Live Alpaca hardware and external astronomy services are not claimed as tested in this environment.
 
 
-## v25 — Imaging control foundation
-- Added Observe workspace for real Alpaca mount/camera/focuser/filter-wheel/rotator control when assigned and available.
-- Added persistent local capture-sequence builder and camera exposure execution.
-- Added explicit device capability/status messaging; no simulated hardware is shown as connected.
-- Redesigned Tonight's imaging session marked-target cards so content uses the full card width instead of inheriting the generic event two-column layout.
-- Fixed Marks panel action layout so Details and Go to belong to each mark instead of appearing as detached controls.
-- Camera rotation state remains persisted per target.
-- Service worker cache bumped to v25.
-
-Validation note: source-level checks cover syntax, duplicate IDs and archive integrity. Real camera/focuser/filter/rotator hardware testing is not claimed without compatible Alpaca devices.
+## v31 focused repair
+- Fixed survey switching by creating a fresh Aladin Lite HiPS base layer per selection, with a v3 API fallback.
+- Survey picker now closes itself after the selected survey is handed to Aladin.
+- Fixed top-bar search layout so Home/Explore/Connect and account controls no longer overlap the search field.
+- Light from Afar heading now uses white `Light from` and orange `Afar`.
+- Fixed missing mark-render rebuild path and immediately refreshes map state after deleting a mark.
+- Delete now clears the active mark popup and performs an empty-map interaction without creating a replacement mark.
 
 
-## v26 — Bug fixes, Planning/Log workflow, and capture foundations
-- Moved Tonight's Imaging Session into Session Log so marked targets and planned events are together with one-click Log session actions.
-- Planning events added to the plan now appear in the Log as separate planned items, with Log session and Remove actions.
-- Fixed the Mark → imaging workflow persistence bug and kept target camera rotation persisted per mark ID/coordinates.
-- Clicking empty map space now closes an open mark popup; mark hit tolerance was increased for easier selection.
-- Deleting a marked target now clears its FOV overlay and closes stale target state.
-- Bottom-bar controls are centered; sidebar controls are slightly larger; Observe uses a matching line icon.
-- Map bottom-bar control now returns to the map/Home workspace instead of silently cycling survey names.
-- Observe mount Abort Slew now checks whether the mount is actually slewing before sending the command.
-- Added optional guide-camera assignment and a guiding-status foundation; AstraLog explicitly reports that Alpaca camera data alone does not provide guiding RMS.
-- Added persistent last-capture summary after a completed capture sequence and a one-click Log capture action.
-- Capture summary carries target, frame count, integration time, completion time, and active optical train into Session Log.
-- Service worker cache bumped to v26.
+## v32 focused repair
+- Restored the top-bar Light from Afar lockup: `Light from` white and `Afar` orange, with responsive spacing so the search field is not covered by navigation controls.
+- Reconnected Friends and Chats sidebar items to their existing Coming Soon windows instead of leaving inactive buttons dead.
+- Repaired Gallery controls so search and the All photos/Favorites selector use the same styled field language as the rest of the app.
+- Removed local Gallery "Post to Explore" / publish controls; Explore remains the future publication surface. Existing stored publish flags are preserved for future migration.
+- Improved Gallery photo editing emphasis and title-field styling.
+- Changed Aladin survey switching to the documented `setImageSurvey(HiPS-ID)` path first, with a fallback layer path, and closes the picker only after the selection has been handed to Aladin.
+- Tightened mark deletion dismissal and keyboard event isolation for Camera rotation.
+- Added a DSS target preview to live Planning cards when the event supplies coordinates, using the CDS HiPS2FITS service.
+- Restored a proper local Register / Sign in flow with password hashing via Web Crypto while keeping the limitation explicit: this is device-local authentication, not a cloud account yet.
+- Expanded About copy and removed remaining visible AstraLog branding.
 
-Validation: JavaScript syntax check, duplicate HTML ID check, required-handler/static-reference checks, and ZIP integrity. Live hardware/browser interaction is not claimed without a compatible Alpaca setup.
+## v32 validation
+- Inline JavaScript syntax checks: passed for all non-empty inline scripts.
+- HTML IDs: 259 total, 259 unique; all `getElementById` and label-for references resolve.
+- CSS brace balance: 473 / 473.
+- Gallery "Post to Explore" UI: absent.
+- Visible `AstraLog` branding: absent.
+- Service worker cache bumped to v32.
+- Live browser/Aladin rendering, external survey tiles, remote Alpaca hardware, and live event/image services were not claimed as fully tested in this environment.
 
-## v27 — Map Surveys, Community Layout, and Gallery Foundation
-- Map bottom-bar control now opens an explicit sky-survey chooser instead of cycling surveys invisibly.
-- Added DSS2 color/red/blue, Pan-STARRS color, 2MASS, and AllWISE survey choices using Aladin Lite survey IDs.
-- Explore and Connect hide the bottom bar and use the full available vertical workspace.
-- Sidebar active-state highlighting now applies to working Settings, Gallery, Marks, HZ Calculator, and About windows.
-- Replaced the Observe bottom-bar icon with Lucide Focus for consistency with the existing icon family.
-- Added local Gallery with photo import, metadata, tags, processing/capture notes, favorites, delete/edit, local JSON export, and Post to Explore.
-- Published Gallery items are shown in the local Explore workspace; real cross-user publishing still requires the future backend/account service.
-- Images are resized/compressed for browser storage. This is a local gallery, not cloud backup.
-- Validation: source JavaScript syntax, duplicate IDs, and ZIP integrity checked; no live browser/hardware test claimed.
+## v33 focused account-flow repair
+- Account status now distinguishes a locally signed-in account from a registered but signed-out account when the panel opens.
+- Registration no longer replaces an existing local account; attempting it switches to sign-in and keeps the saved account intact.
+- Service-worker cache bumped to v33.
+- Checks run: both non-empty inline scripts and the service worker pass JavaScriptCore syntax compilation; static HTML has no duplicate IDs or unresolved label/`getElementById` references; CSS braces balance (474/474).
+- Isolated account-flow exercise passed for registration, duplicate-registration protection, incorrect/correct sign-in, sign-out, and reopening while signed out. The exercise used a mocked password hash and does not verify the browser's Web Crypto implementation.
+- Manual browser checks still needed for the actual form presentation, Web Crypto behavior, persistence across reloads, and account states after reopening.
+- No browser automation is available in this environment, so visual UI behavior and the rest of the astronomy workflows were not confirmed in a live browser.
+- This remains device-local authentication. Cloud accounts, password recovery, account sync, and server-side identity are not implemented.
+
+## v34 authentication page and account connection
+- Added a standalone, responsive `auth.html` page using the existing Light from Afar visual language.
+- Added email/password registration and sign-in, Google and Apple OAuth buttons, email confirmation return, password-reset email flow, and password recovery form.
+- The public sky application remains usable without an account. The profile button opens sign-in/register links for guests and account details/edit/sign-out actions for signed-in users.
+- Added a Supabase client boundary. `auth-config.js` intentionally contains blank project URL and publishable-key values; authentication stays unavailable until the project is configured.
+- Added `supabase-profiles.sql` with a user-owned profile table and row-level security policies. No service-role key, OAuth secret, or production password belongs in browser code.
+- Legacy `lightfromafar-local-account` data is not deleted, but it is not used as a cloud identity and cannot be migrated as a password credential.
+- Authentication assets are included in the service worker app shell.
+
+### Setup required before sign-up can work
+1. Create a Supabase project and run `supabase-profiles.sql` in its SQL Editor.
+2. Put the project's URL and **publishable** key in `auth-config.js`. Never use a secret/service-role key in the browser.
+3. In Supabase Auth URL Configuration, set the production site URL and allow the deployed `astralog.html` and `auth.html?mode=recovery` return URLs. For local development, serve the folder from `localhost`; do not open the files with `file://`.
+4. Enable email/password sign-up and email confirmation. Configure production SMTP before relying on confirmation and recovery email delivery.
+5. In Supabase Auth Providers, configure Google and Apple. Put provider client IDs and secrets only in the Supabase dashboard. For both OAuth provider consoles, register the callback URL shown by the Supabase provider settings; Supabase then redirects back to the allowed Light from Afar URL.
+6. Deploy over HTTPS and test on the deployed domain. Apple OAuth also requires maintaining its provider signing secret according to Apple's rotation schedule.
+
+The provider integrations are wired in the client, but they have not been activated or end-to-end tested because this workspace has no Supabase project or OAuth credentials. Email delivery, Google, and Apple sign-in therefore remain unverified until setup is completed.
+
+### Focused auth and profile fixes
+- Matched authentication page colors to the existing site palette without changing its layout.
+- Profile coordinates use a Unicode degree escape and the close control uses a plain `X`, avoiding mojibake.
+- Password recovery only exposes the new-password form after Supabase reports a valid `PASSWORD_RECOVERY` session. It does not ask for the current password; expired or unrecognized links prompt the user to request another reset email.
+- During recovery-link verification, the sign-in form stays hidden; once verified, only the new-password and confirmation fields are shown.
+- Service-worker cache name remains v34; the updated files are refreshed within the existing v34 app shell.
+- Added UTF-8 charset metadata to the main page and standardized website close controls to an ASCII `X`.
+
+### v34 source validation
+- JavaScriptCore syntax checks passed for both non-empty inline scripts, `auth-page.js`, `supabase-client.js`, and `sw.js`.
+- Static markup check: no duplicate IDs or unresolved label, ARIA, or `getElementById` references in either page.
+- CSS braces balance: `astralog.css` 484/484; `auth.css` 48/48.
+- Every service-worker app-shell file exists. The original optional local `aladin.js` file is still absent and continues to use the app's existing external CDN fallback.
+- Browser rendering, real Supabase email delivery, confirmation and recovery links, database RLS execution, Google OAuth, and Apple OAuth still require configured credentials and browser testing.

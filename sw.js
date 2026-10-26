@@ -1,10 +1,11 @@
-const CACHE_NAME = 'astralog-shell-v27';
-const APP_SHELL = ['./', './index.html', './lightfromafar.css'];
+const CACHE_NAME = 'light-from-afar-shell-v34';
+// Refresh the existing v34 app shell with UTF-8 markup and consistent close controls.
+const APP_SHELL = ['./', './astralog.html', './astralog.css', './auth.html', './auth.css', './auth-page.js', './auth-config.js', './supabase-client.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('astralog-shell-') && key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', event => {
   const request = event.request;
