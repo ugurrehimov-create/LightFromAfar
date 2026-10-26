@@ -69,20 +69,20 @@ This build starts from v27. No community, gallery, planning, observing, optical-
 - Added a standalone, responsive `auth.html` page using the existing Light from Afar visual language.
 - Added email/password registration and sign-in, Google and Apple OAuth buttons, email confirmation return, password-reset email flow, and password recovery form.
 - The public sky application remains usable without an account. The profile button opens sign-in/register links for guests and account details/edit/sign-out actions for signed-in users.
-- Added a Supabase client boundary. `auth-config.js` intentionally contains blank project URL and publishable-key values; authentication stays unavailable until the project is configured.
+- Added a Supabase client boundary. `auth-config.js` currently points to the project's Supabase URL and contains its browser-safe publishable key. OAuth client secrets belong only in the Supabase dashboard.
 - Added `supabase-profiles.sql` with a user-owned profile table and row-level security policies. No service-role key, OAuth secret, or production password belongs in browser code.
 - Legacy `lightfromafar-local-account` data is not deleted, but it is not used as a cloud identity and cannot be migrated as a password credential.
 - Authentication assets are included in the service worker app shell.
 
 ### Setup required before sign-up can work
 1. Create a Supabase project and run `supabase-profiles.sql` in its SQL Editor.
-2. Put the project's URL and **publishable** key in `auth-config.js`. Never use a secret/service-role key in the browser.
-3. In Supabase Auth URL Configuration, set the production site URL and allow the deployed `index.html` and `auth.html?mode=recovery` return URLs. For local development, serve the folder from `localhost`; do not open the files with `file://`.
+2. Confirm `auth-config.js` points to the active project and uses its **publishable** key. Never use a secret/service-role key in browser code.
+3. In Supabase Auth URL Configuration, set the production site URL and allow the deployed `index.html` and `auth.html?mode=recovery` return URLs. For local development, also allow `http://localhost:8000/index.html` and `http://localhost:8000/auth.html?mode=recovery`; serve the folder from localhost rather than opening files with `file://`.
 4. Enable email/password sign-up and email confirmation. Configure production SMTP before relying on confirmation and recovery email delivery.
-5. In Supabase Auth Providers, configure Google and Apple. Put provider client IDs and secrets only in the Supabase dashboard. For both OAuth provider consoles, register the callback URL shown by the Supabase provider settings; Supabase then redirects back to the allowed Light from Afar URL.
+5. In Supabase Auth Providers, enable Google and Apple and enter their client IDs and secrets. In Google Cloud, create a Web OAuth client, add the app origins (`http://localhost:8000` and your production origin), and add this project's Supabase callback as an Authorized redirect URI: `https://ossktqlkhjaiblmnmzea.supabase.co/auth/v1/callback`. This callback is different from the app return URLs in Supabase Auth URL Configuration.
 6. Deploy over HTTPS and test on the deployed domain. Apple OAuth also requires maintaining its provider signing secret according to Apple's rotation schedule.
 
-The provider integrations are wired in the client, but they have not been activated or end-to-end tested because this workspace has no Supabase project or OAuth credentials. Email delivery, Google, and Apple sign-in therefore remain unverified until setup is completed.
+The provider integrations are wired in the client, but this workspace cannot inspect whether Google and Apple are enabled or configured in the Supabase dashboard. Email delivery and provider sign-in remain unverified until tested against the live project.
 
 ### Focused auth and profile fixes
 - Matched authentication page colors to the existing site palette without changing its layout.
