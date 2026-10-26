@@ -71,7 +71,7 @@
   }
 
   function returnToApp() {
-    window.location.replace(new URL('astralog.html', window.location.href).href);
+    window.location.replace(new URL('index.html', window.location.href).href);
   }
 
   function showConfiguration() {
@@ -90,7 +90,7 @@
     setBusy(true);
     setStatus('Opening ' + (provider === 'apple' ? 'Apple' : 'Google') + ' sign in…');
     try {
-      const redirectTo = new URL('astralog.html', window.location.href).href;
+      const redirectTo = new URL('index.html', window.location.href).href;
       const result = await client.auth.signInWithOAuth({
         provider: provider,
         options: { redirectTo: redirectTo }
@@ -128,7 +128,7 @@
     setBusy(true);
     setStatus(mode === 'signup' ? 'Creating your account…' : 'Signing in…');
     try {
-      const appUrl = new URL('astralog.html', window.location.href).href;
+      const appUrl = new URL('index.html', window.location.href).href;
       let result;
       if (mode === 'signup') {
         result = await client.auth.signUp({

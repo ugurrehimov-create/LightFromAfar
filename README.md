@@ -77,7 +77,7 @@ This build starts from v27. No community, gallery, planning, observing, optical-
 ### Setup required before sign-up can work
 1. Create a Supabase project and run `supabase-profiles.sql` in its SQL Editor.
 2. Put the project's URL and **publishable** key in `auth-config.js`. Never use a secret/service-role key in the browser.
-3. In Supabase Auth URL Configuration, set the production site URL and allow the deployed `astralog.html` and `auth.html?mode=recovery` return URLs. For local development, serve the folder from `localhost`; do not open the files with `file://`.
+3. In Supabase Auth URL Configuration, set the production site URL and allow the deployed `index.html` and `auth.html?mode=recovery` return URLs. For local development, serve the folder from `localhost`; do not open the files with `file://`.
 4. Enable email/password sign-up and email confirmation. Configure production SMTP before relying on confirmation and recovery email delivery.
 5. In Supabase Auth Providers, configure Google and Apple. Put provider client IDs and secrets only in the Supabase dashboard. For both OAuth provider consoles, register the callback URL shown by the Supabase provider settings; Supabase then redirects back to the allowed Light from Afar URL.
 6. Deploy over HTTPS and test on the deployed domain. Apple OAuth also requires maintaining its provider signing secret according to Apple's rotation schedule.
