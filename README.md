@@ -92,6 +92,7 @@ The provider integrations are wired in the client, but this workspace cannot ins
 - Service-worker cache name remains v34; the updated files are refreshed within the existing v34 app shell.
 - Added UTF-8 charset metadata to the main page and standardized website close controls to an ASCII `X`.
 - The main app is `index.html`; `astralog.html` remains as a small legacy redirect so previously sent confirmation links continue to work and retain their auth tokens.
+- Aladin Lite now loads asynchronously from jsDelivr with the official host as fallback. If both map hosts fail, the application controls still load and the map area explains the outage instead of blocking the page.
 
 ### v34 source validation
 - JavaScriptCore syntax checks passed for both non-empty inline scripts, `auth-page.js`, `supabase-client.js`, and `sw.js`.

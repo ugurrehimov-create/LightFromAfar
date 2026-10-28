@@ -347,6 +347,21 @@
   overflow: hidden;
 }
 
+.lightfromafar-map-unavailable {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(90%, 420px);
+  transform: translate(-50%, -50%);
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 126, 66, 0.3);
+  border-radius: 10px;
+  color: #e2e4e9;
+  background: rgba(18, 14, 54, 0.92);
+  font: 13px/1.6 sans-serif;
+  text-align: center;
+  z-index: 10;
+}
+
 .lightfromafar-aladin .aladin-fov,
 .lightfromafar-aladin .aladin-fullScreen-control,
 .lightfromafar-aladin .aladin-stack-control,

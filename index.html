@@ -970,8 +970,54 @@
 
       <div id="night-overlay"></div>
 
-      <script src="aladin.js"></script>
-      <script>window.A || document.write('<script src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js"><\/script>');</script>
+      <script>
+        window.__lightFromAfarAladinReady = (function () {
+          let settled = false;
+          let fallbackStarted = false;
+          let primaryAccepted = false;
+          let finish;
+          const ready = new Promise(function (resolve) { finish = resolve; });
+          const timeout = window.setTimeout(function () { finishReady(false); }, 15000);
+
+          function finishReady(available) {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeout);
+            finish(available);
+          }
+
+          function acceptLibrary(library, fromFallback) {
+            if (settled || (fallbackStarted && !fromFallback) || !library || !library.init) return;
+            if (!fromFallback) primaryAccepted = true;
+            window.A = library;
+            Promise.resolve(library.init).then(function () {
+              finishReady(true);
+            }).catch(function () {
+              if (fromFallback) finishReady(false);
+              else startOfficialFallback();
+            });
+          }
+
+          function startOfficialFallback() {
+            if (settled || fallbackStarted) return;
+            fallbackStarted = true;
+            const script = document.createElement('script');
+            script.src = 'https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js';
+            script.async = true;
+            script.onload = function () { acceptLibrary(window.A, true); };
+            script.onerror = function () { finishReady(false); };
+            document.head.appendChild(script);
+          }
+
+          window.setTimeout(function () {
+            if (!primaryAccepted) startOfficialFallback();
+          }, 5000);
+          import('https://cdn.jsdelivr.net/npm/aladin-lite@3.9.2-beta/dist/aladin.js')
+            .then(function (module) { acceptLibrary(module.default || module); })
+            .catch(startOfficialFallback);
+          return ready;
+        })();
+      </script>
       <script src="auth-config.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
       <script src="supabase-client.js"></script>
@@ -1015,7 +1061,22 @@
           if (badge) badge.textContent = markedStars.length;
         }
 
-        A.init.then(() => {
+        function showMapUnavailable(message) {
+          const container = document.getElementById('aladin-lite-div');
+          if (!container) return;
+          const notice = document.createElement('div');
+          notice.className = 'lightfromafar-map-unavailable';
+          notice.setAttribute('role', 'status');
+          notice.textContent = message || 'The sky survey service is not responding. Other Light from Afar tools are still available.';
+          container.appendChild(notice);
+        }
+
+        window.__lightFromAfarAladinReady.then(function (mapAvailable) {
+          if (!mapAvailable || !window.A || !window.A.init) {
+            showMapUnavailable();
+            return;
+          }
+          return A.init.then(() => {
           aladin = A.aladin('#aladin-lite-div', {
             target: '40.4093, 49.8671',
             fov: 35,
@@ -1183,7 +1244,11 @@
                 console.log('SIMBAD snap failed:', error);
               }
             );
-          }, true);        });
+          }, true);
+          });
+        }).catch(function () {
+          showMapUnavailable('The sky survey could not initialize. Other Light from Afar tools are still available.');
+        });
 
         function searchStar() {
           const input = document.getElementById('star-search');

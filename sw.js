@@ -1,5 +1,5 @@
 const CACHE_NAME = 'light-from-afar-shell-v34';
-// Refresh the existing v34 app shell with UTF-8 markup and consistent close controls.
+// Refresh the v34 app shell and keep a slow map CDN from blocking its core UI.
 const APP_SHELL = ['./', './index.html', './astralog.html', './astralog.css', './auth.html', './auth.css', './auth-page.js', './auth-config.js', './supabase-client.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
