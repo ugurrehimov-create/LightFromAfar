@@ -91,9 +91,11 @@
     setStatus('Opening ' + (provider === 'apple' ? 'Apple' : 'Google') + ' sign in…');
     try {
       const redirectTo = new URL('index.html', window.location.href).href;
+      const options = { redirectTo: redirectTo };
+      if (provider === 'google') options.queryParams = { prompt: 'select_account' };
       const result = await client.auth.signInWithOAuth({
         provider: provider,
-        options: { redirectTo: redirectTo }
+        options: options
       });
       if (result.error) throw result.error;
     } catch (error) {

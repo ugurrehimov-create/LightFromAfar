@@ -1,5 +1,5 @@
 const CACHE_NAME = 'light-from-afar-shell-v34';
-// Refresh the v34 app shell and keep a slow map CDN from blocking its core UI.
+// Refresh the v34 app shell, async map loader, and Google account-picker flow.
 const APP_SHELL = ['./', './index.html', './astralog.html', './astralog.css', './auth.html', './auth.css', './auth-page.js', './auth-config.js', './supabase-client.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
