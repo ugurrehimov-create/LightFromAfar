@@ -15,8 +15,34 @@
       </main>
 
       <button class="mobile-nav-scrim" id="mobile-nav-scrim" type="button" aria-label="Close menu"></button>
-      <aside class="sidebar" id="main-sidebar" aria-label="More tools">
+      <aside class="sidebar" id="main-sidebar" aria-label="More menu">
+        <div class="mobile-drawer-header">
+          <strong>More</strong>
+          <button class="mobile-drawer-close" id="mobile-nav-close" type="button" aria-label="Close menu">X</button>
+        </div>
         <div class="sidebar-buttons">
+          <button class="menu-item mobile-drawer-workspace active" type="button" data-workspace="home" aria-current="page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
+            Sky map
+          </button>
+          <button class="menu-item mobile-drawer-workspace" type="button" data-workspace="explore">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.8 5.41-5.42 1.8 1.81-5.41z"/></svg>
+            Explore
+          </button>
+          <button class="menu-item mobile-drawer-workspace" type="button" data-workspace="connect">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+            Connect
+          </button>
+          <div class="mobile-drawer-divider"></div>
+          <button class="menu-item mobile-drawer-tool" id="mobile-map-menu" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18 7.64 4.36a1 1 0 0 1 0 1.74l-7.64 4.36a1.69 1.69 0 0 1-1.66 0L3.53 8.28a1 1 0 0 1 0-1.74l7.64-4.36a1.69 1.69 0 0 1 1.66 0Z"/><path d="m3.53 12.1 7.64 4.36a1.69 1.69 0 0 0 1.66 0l7.64-4.36"/><path d="m3.53 15.92 7.64 4.36a1.69 1.69 0 0 0 1.66 0l7.64-4.36"/></svg>
+            Sky survey
+          </button>
+          <button class="menu-item mobile-drawer-tool" id="mobile-export-menu" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+            Export marks
+          </button>
+          <div class="mobile-drawer-divider"></div>
           <div class="menu-item" id="settings-menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
               <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>
@@ -159,7 +185,7 @@
         <!-- HEADER -->
 
         <div class="topbar-right">
-          <button class="screen-mode-button" id="night-button" type="button" aria-pressed="false">
+          <button class="screen-mode-button" id="night-button" type="button" aria-label="Toggle red night vision" title="Toggle red night vision" aria-pressed="false">
             <div class="night-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon">
               <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>
@@ -198,7 +224,7 @@
 
       <aside class="bottombar">
         <div class="bottom-left">
-          <button class="bottombar-button" id="mark-button" type="button">
+          <button class="bottombar-button" id="mark-button" type="button" aria-label="Mark a target on the sky map" aria-pressed="false">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pen-icon lucide-pen">
               <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
             </svg>
@@ -207,7 +233,7 @@
             </div>
           </button>
 
-          <button class="bottombar-button" id="planning-button" type="button">
+          <button class="bottombar-button" id="planning-button" type="button" aria-label="Open observing plan" aria-pressed="false">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notepad-text-icon lucide-notepad-text">
               <path d="M8 2v4"/>
               <path d="M12 2v4"/>
@@ -222,12 +248,12 @@
             </div>
           </button>
 
-          <button class="bottombar-button" id="observe-button" type="button">
+          <button class="bottombar-button" id="observe-button" type="button" aria-label="Open capture controls" aria-pressed="false">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-focus-icon lucide-focus"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
             <div>Observe</div>
           </button>
 
-          <button class="bottombar-button" id="log-button" type="button">
+          <button class="bottombar-button" id="log-button" type="button" aria-label="Open session log" aria-pressed="false">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notepad-text-icon lucide-notepad-text">
               <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
               <path d="M8 7h8"/>
@@ -236,6 +262,11 @@
             <div>
               Log
             </div>
+          </button>
+
+          <button class="bottombar-button mobile-more-button" id="mobile-more-button" type="button" aria-label="More tools" aria-controls="main-sidebar" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+            <div>More</div>
           </button>
 
           <button class="bottombar-button" id="map-button" type="button">
@@ -298,6 +329,10 @@
             <button class="lightfromafar-close-button" id="observe-close-button" type="button">X</button>
           </div>
           <div class="lightfromafar-observe-banner" id="observe-status">Select an optical train to see the devices available for this session.</div>
+          <div class="lightfromafar-observe-quick-tools">
+            <button class="lightfromafar-btn lightfromafar-btn-edit" id="screen-wake-lock-button" type="button" aria-pressed="false">Keep screen awake</button>
+            <span id="screen-wake-lock-status">Useful during a capture. This only works while the observing tab is visible.</span>
+          </div>
           <div class="lightfromafar-observe-grid">
             <section class="lightfromafar-observe-card">
               <div class="lightfromafar-observe-card-title">Mount</div>
@@ -465,7 +500,7 @@
                 <option value="deep-sky">Deep sky</option>
               </select>
             </div>
-            <button class="lightfromafar-planning-refresh" id="planning-refresh-button" type="button">Refresh live events</button>
+            <button class="lightfromafar-planning-refresh" id="planning-refresh-button" type="button" aria-label="Refresh event and weather data">Refresh data</button>
           </div>
 
           <div class="lightfromafar-planning-live-status" id="planning-updated">Live events · SpaceCatalog</div>
@@ -482,7 +517,7 @@
             <div><span>Mount</span><strong id="planning-equipment-mount">—</strong></div>
           </div>
 
-          <div class="lightfromafar-equipment-result" id="planning-weather">Checking the cloud forecast…</div>
+          <div class="lightfromafar-equipment-result" id="planning-weather" role="status" aria-live="polite" aria-atomic="true">Checking tonight’s site weather…</div>
 
           <div class="lightfromafar-planning-list" id="planning-list"></div>
         </div>
@@ -2272,32 +2307,74 @@
           document.getElementById('log-modal').classList.remove('active');
         }
 
-        // Cloud cover for tonight (21:00 to 03:00) from Open-Meteo
-        function summarizeClouds(times, clouds) {
-          const day0 = times[0].slice(0, 10);
-          const day1 = times[24].slice(0, 10);
+        // Site weather for tonight (21:00 to 03:00) from Open-Meteo.
+        function summarizeClouds(hourly) {
+          if (!hourly || !Array.isArray(hourly.time) || hourly.time.length < 2) throw new Error('weather service returned incomplete hourly data');
+          const day0 = hourly.time[0].slice(0, 10);
+          const nextLocalDate = new Date(day0 + 'T00:00:00Z');
+          nextLocalDate.setUTCDate(nextLocalDate.getUTCDate() + 1);
+          const day1 = nextLocalDate.toISOString().slice(0, 10);
+          const metric = function(name, index) {
+            const raw = hourly[name] && hourly[name][index];
+            if (raw == null || raw === '') return null;
+            const value = Number(raw);
+            return Number.isFinite(value) ? value : null;
+          };
           const hours = [];
-          times.forEach(function(time, index) {
-            if (time >= day0 + 'T21:00' && time <= day1 + 'T03:00') hours.push({ time: time.slice(11, 16), cloud: clouds[index] });
+          hourly.time.forEach(function(time, index) {
+            const inNightWindow = time >= day0 + 'T21:00' && time <= day1 + 'T03:00';
+            const cloud = metric('cloud_cover', index);
+            if (inNightWindow && cloud !== null) hours.push({
+              time: time.slice(11, 16), cloud: cloud,
+              rainChance: metric('precipitation_probability', index),
+              rain: metric('precipitation', index),
+              wind: metric('wind_speed_10m', index),
+              temp: metric('temperature_2m', index),
+              dew: metric('dew_point_2m', index),
+              humidity: metric('relative_humidity_2m', index)
+            });
           });
-          const average = hours.reduce(function(sum, hour) { return sum + hour.cloud; }, 0) / hours.length;
-          const best = hours.reduce(function(a, b) { return b.cloud < a.cloud ? b : a; });
-          const verdict = average < 30 ? 'Good night for imaging' : (average < 60 ? 'Partly cloudy' : 'Mostly cloudy');
-          return verdict + ' · average cloud cover ' + average.toFixed(0) + '% tonight (21:00–03:00) · clearest at ' + best.time + ' (' + best.cloud + '%)';
+          if (!hours.length) throw new Error('no weather hours available for tonight');
+          const averageCloud = hours.reduce(function(sum, hour) { return sum + hour.cloud; }, 0) / hours.length;
+          const clearest = hours.reduce(function(best, hour) { return hour.cloud < best.cloud ? hour : best; });
+          const maximum = function(key) { const values = hours.map(function(hour) { return hour[key]; }).filter(function(value) { return value !== null; }); return values.length ? Math.max.apply(null, values) : null; };
+          const minimum = function(key) { const values = hours.map(function(hour) { return hour[key]; }).filter(function(value) { return value !== null; }); return values.length ? Math.min.apply(null, values) : null; };
+          const tempValues = hours.map(function(hour) { return hour.temp; }).filter(function(value) { return value !== null; });
+          const dewGaps = hours.filter(function(hour) { return hour.temp !== null && hour.dew !== null; }).map(function(hour) { return hour.temp - hour.dew; });
+          const rainTotal = hours.reduce(function(sum, hour) { return sum + (hour.rain === null ? 0 : hour.rain); }, 0);
+          const highestRainChance = maximum('rainChance');
+          const highestWind = maximum('wind');
+          const highestHumidity = maximum('humidity');
+          const tempRange = tempValues.length ? Math.round(Math.min.apply(null, tempValues)) + '–' + Math.round(Math.max.apply(null, tempValues)) + ' °C' : 'Unavailable';
+          const dewGap = dewGaps.length ? Math.min.apply(null, dewGaps).toFixed(1) + ' °C' : 'Unavailable';
+          return '<div class="lightfromafar-weather-heading"><strong>Tonight at your site</strong><span>21:00–03:00 local</span></div>' +
+            '<div class="lightfromafar-weather-grid">' +
+              '<div><span>Cloud cover</span><strong>' + averageCloud.toFixed(0) + '% average</strong><small>Clearest ' + escapeHtml(clearest.time) + ' · ' + clearest.cloud.toFixed(0) + '%</small></div>' +
+              '<div><span>Rain</span><strong>' + (highestRainChance === null ? 'Unavailable' : Math.round(highestRainChance) + '% peak chance') + '</strong><small>' + rainTotal.toFixed(1) + ' mm predicted</small></div>' +
+              '<div><span>Wind</span><strong>' + (highestWind === null ? 'Unavailable' : Math.round(highestWind) + ' km/h peak') + '</strong><small>10 m forecast</small></div>' +
+              '<div><span>Temperature / dew</span><strong>' + tempRange + '</strong><small>Closest air-to-dew-point gap ' + dewGap + (highestHumidity === null ? '' : ' · humidity up to ' + Math.round(highestHumidity) + '%') + '</small></div>' +
+            '</div>' +
+            '<p class="lightfromafar-weather-note">Open-Meteo site forecast, not a guarantee. It does not measure transparency, seeing, or clouds along your target line.</p>';
         }
 
         async function loadCloudForecast() {
           const box = document.getElementById('planning-weather');
           const lat = document.getElementById('planning-latitude').value;
           const lon = document.getElementById('planning-longitude').value;
-          box.textContent = 'Checking the cloud forecast…';
+          box.textContent = 'Checking tonight’s site weather…';
           try {
-            const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&hourly=cloud_cover&forecast_days=2&timezone=auto');
+            if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lon)) || Math.abs(Number(lat)) > 90 || Math.abs(Number(lon)) > 180) throw new Error('enter valid observing-site coordinates');
+            const params = new URLSearchParams({
+              latitude: lat, longitude: lon,
+              hourly: 'cloud_cover,precipitation_probability,precipitation,wind_speed_10m,temperature_2m,dew_point_2m,relative_humidity_2m',
+              forecast_days: '2', timezone: 'auto'
+            });
+            const response = await fetch('https://api.open-meteo.com/v1/forecast?' + params.toString());
             if (!response.ok) throw new Error('weather service returned ' + response.status);
             const data = await response.json();
-            box.textContent = summarizeClouds(data.hourly.time, data.hourly.cloud_cover);
+            box.innerHTML = summarizeClouds(data.hourly);
           } catch (error) {
-            box.textContent = 'Cloud forecast unavailable (' + error.message + ').';
+            box.textContent = 'Site weather unavailable (' + error.message + ').';
           }
         }
 
@@ -2757,11 +2834,28 @@
           const list = document.getElementById('planning-list');
           const status = document.getElementById('planning-source-status');
           const updated = document.getElementById('planning-updated');
-          list.innerHTML = '<div class="lightfromafar-planning-empty">Loading live sky events…</div>';
-          if (status) status.textContent = navigator.onLine === false
-            ? 'Browser is offline. Planning does not require telescope connection; cached events will be used if available.'
-            : 'Connecting to live event data…';
-          if (updated) updated.textContent = 'Loading live events…';
+          let cachedAvailable = false;
+          try {
+            const cached = JSON.parse(localStorage.getItem('lightfromafar-planning-events-cache') || 'null');
+            if (cached && Array.isArray(cached.events) && cached.events.length) {
+              planningEvents = cached.events;
+              planningLastUpdated = cached.savedAt ? new Date(cached.savedAt) : null;
+              cachedAvailable = true;
+              renderPlanning();
+            }
+          } catch (cacheError) {
+            // Ignore malformed cache and request a fresh event list.
+          }
+          if (cachedAvailable) {
+            if (status) status.textContent = 'Showing saved events while live sky data refreshes…';
+            if (updated) updated.textContent = 'Saved planning data';
+          } else {
+            list.innerHTML = '<div class="lightfromafar-planning-empty">Loading live sky events…</div>';
+            if (status) status.textContent = navigator.onLine === false
+              ? 'Browser is offline. Cached planning data will appear if this device has any.'
+              : 'Connecting to live event data…';
+            if (updated) updated.textContent = 'Loading live events…';
+          }
 
           const controller = new AbortController();
           const timeout = setTimeout(function() { controller.abort(); }, 12000);
@@ -2876,9 +2970,15 @@
           updateProfileStats();
         }
 
-        function targetPreviewHtml(event) {
-          const ra = Number(event && event.ra), dec = Number(event && event.dec);
-          if (!Number.isFinite(ra) || !Number.isFinite(dec)) return '';
+        function targetPreviewHtml(event, eager) {
+          const rawRa = event && event.ra, rawDec = event && event.dec;
+          if (rawRa == null || rawDec == null || rawRa === '' || rawDec === '') {
+            return '<div class="lightfromafar-target-preview is-unavailable"><span>No coordinates for sky preview</span></div>';
+          }
+          const ra = Number(rawRa), dec = Number(rawDec);
+          if (!Number.isFinite(ra) || !Number.isFinite(dec)) {
+            return '<div class="lightfromafar-target-preview is-unavailable"><span>Sky preview unavailable</span></div>';
+          }
           const rotation = Number(getAstroSettings().cameraRotation || 0);
           const params = new URLSearchParams({
             hips: 'CDS/P/DSS2/color', width: '220', height: '150', projection: 'TAN',
@@ -2886,7 +2986,8 @@
             rotation_angle: String(Number.isFinite(rotation) ? rotation : 0), format: 'jpg',
             min_cut: '1%', max_cut: '99%', stretch: 'asinh'
           });
-          return '<div class="lightfromafar-target-preview"><img loading="lazy" src="https://alasky.cds.unistra.fr/hips-image-services/hips2fits?' + params.toString() + '" alt="DSS preview of ' + escapeHtml(event.target || event.name || 'target') + '"><span>Target preview · DSS</span></div>';
+          const loading = eager ? 'eager' : 'lazy';
+          return '<div class="lightfromafar-target-preview is-loading"><img loading="' + loading + '" decoding="async" fetchpriority="low" width="220" height="150" referrerpolicy="no-referrer" src="https://alasky.cds.unistra.fr/hips-image-services/hips2fits?' + params.toString() + '" alt="DSS preview of ' + escapeHtml(event.target || event.name || 'target') + '"><span>Loading sky preview…</span></div>';
         }
 
         function renderPlanning() {
@@ -2907,7 +3008,7 @@
             return;
           }
 
-          events.forEach(function(event) {
+          events.forEach(function(event, index) {
             const card = document.createElement('div');
             card.className = 'lightfromafar-event-card';
             const days = planningDaysAway(event);
@@ -2917,7 +3018,7 @@
             const skyPosition = event.altitude === null ? '—' : event.altitude.toFixed(1) + '° alt · ' + event.azimuth.toFixed(0) + '° az';
             const daysText = days <= 0 ? 'Now' : (days === 1 ? 'Tomorrow' : days + ' days');
             card.innerHTML =
-              '<div class="lightfromafar-event-date"><b>' + formatPlanningDate(event) + '</b><small>' + daysText + '</small>' + targetPreviewHtml(event) + '</div>' +
+              '<div class="lightfromafar-event-date"><b>' + formatPlanningDate(event) + '</b><small>' + daysText + '</small>' + targetPreviewHtml(event, index < 3) + '</div>' +
               '<div class="lightfromafar-event-main">' +
                 '<div class="lightfromafar-event-title-row"><div><span class="lightfromafar-event-type">' + event.kind + '</span><h3>' + event.name + '</h3></div>' +
                 '<button class="lightfromafar-plan-button' + savedClass + '" type="button">' + (savedClass ? 'Planned' : 'Add to plan') + '</button></div>' +
@@ -2929,6 +3030,22 @@
                   '<div class="lightfromafar-event-equipment"><span>For your equipment</span><p>' + equipmentAssessment(event) + '</p></div>' +
                 '</div>' +
               '</div>';
+            const preview = card.querySelector('.lightfromafar-target-preview');
+            const previewImage = preview && preview.querySelector('img');
+            if (previewImage) {
+              previewImage.addEventListener('load', function() {
+                preview.classList.remove('is-loading');
+                const caption = preview.querySelector('span');
+                if (caption) caption.textContent = 'Target preview · DSS';
+              }, { once: true });
+              previewImage.addEventListener('error', function() {
+                preview.classList.remove('is-loading');
+                preview.classList.add('is-unavailable');
+                previewImage.remove();
+                const caption = preview.querySelector('span');
+                if (caption) caption.textContent = 'DSS preview unavailable';
+              }, { once: true });
+            }
             card.querySelector('.lightfromafar-plan-button').addEventListener('click', function() { savePlanning(event.id); });
             list.appendChild(card);
           });
@@ -3717,7 +3834,7 @@
         document.getElementById('planning-button').addEventListener('click', function() { const active = document.getElementById('planning-modal').classList.contains('active'); if (active) closeAllContentWindows(); else { openPlanning(); this.classList.add('marking-active'); this.setAttribute('aria-pressed','true'); } });
         document.getElementById('planning-close-button').addEventListener('click', closeAllContentWindows);
         document.getElementById('planning-filter').addEventListener('change', renderPlanning);
-        document.getElementById('planning-refresh-button').addEventListener('click', loadLivePlanningEvents);
+        document.getElementById('planning-refresh-button').addEventListener('click', function() { loadCloudForecast(); loadLivePlanningEvents(); });
         applySidebarSetting();
         loadOpticalTrainState();
         renderMarksList();
@@ -3733,7 +3850,7 @@
         }
 
         function setWorkspaceNavigation(activeWorkspace) {
-          document.querySelectorAll('.topbar-button[data-workspace]').forEach(function(button) {
+        document.querySelectorAll('.topbar-button[data-workspace], .mobile-drawer-workspace[data-workspace]').forEach(function(button) {
             const isActive = button.dataset.workspace === activeWorkspace;
             button.classList.toggle('active', isActive);
             if (isActive) button.setAttribute('aria-current', 'page');
@@ -3759,12 +3876,13 @@
           setWorkspaceNavigation('home');
         }
 
-        document.querySelectorAll('.topbar-button[data-workspace]').forEach(function(button) {
+        document.querySelectorAll('.topbar-button[data-workspace], .mobile-drawer-workspace[data-workspace]').forEach(function(button) {
           button.addEventListener('click', function() {
             const workspace = button.dataset.workspace;
             if (workspace === 'explore') openCommunityPanel('explore');
             else if (workspace === 'connect') openCommunityPanel('connect');
             else if (workspace === 'home') openHomeScene();
+            setMobileNavOpen(false);
           });
         });
         document.querySelectorAll('[data-connect-tab]').forEach(function(button) {
@@ -3799,6 +3917,61 @@
         });
         setNightMode(localStorage.getItem('lightfromafar-night-mode') === 'on');
 
+        let screenWakeLock = null;
+        let screenWakeLockWanted = false;
+        let screenWakeLockPending = false;
+        const screenWakeLockButton = document.getElementById('screen-wake-lock-button');
+        const screenWakeLockStatus = document.getElementById('screen-wake-lock-status');
+        async function requestScreenWakeLock() {
+          if (screenWakeLock || screenWakeLockPending || !screenWakeLockWanted) return;
+          if (!navigator.wakeLock || !navigator.wakeLock.request) {
+            screenWakeLockWanted = false;
+            screenWakeLockButton.setAttribute('aria-pressed', 'false');
+            screenWakeLockStatus.textContent = 'This browser cannot keep the screen awake. Change the screen timeout in your phone settings.';
+            return;
+          }
+          screenWakeLockPending = true;
+          try {
+            const lock = await navigator.wakeLock.request('screen');
+            screenWakeLockPending = false;
+            if (!screenWakeLockWanted) { await lock.release(); return; }
+            screenWakeLock = lock;
+            screenWakeLockButton.setAttribute('aria-pressed', 'true');
+            screenWakeLockStatus.textContent = 'Screen stays awake while this tab is visible.';
+            screenWakeLock.addEventListener('release', function() {
+              screenWakeLock = null;
+              if (screenWakeLockWanted) {
+                screenWakeLockStatus.textContent = 'Screen lock paused in the background. Return to this tab to resume.';
+                if (document.visibilityState === 'visible') window.setTimeout(requestScreenWakeLock, 0);
+              } else {
+                screenWakeLockButton.setAttribute('aria-pressed', 'false');
+                screenWakeLockStatus.textContent = 'Screen can sleep normally.';
+              }
+            }, { once: true });
+          } catch (error) {
+            screenWakeLockPending = false;
+            screenWakeLock = null;
+            screenWakeLockWanted = false;
+            screenWakeLockButton.setAttribute('aria-pressed', 'false');
+            screenWakeLockStatus.textContent = 'Screen lock was denied. Check browser permissions or your phone’s battery saver.';
+          }
+        }
+        screenWakeLockButton.addEventListener('click', async function() {
+          if (screenWakeLockWanted) {
+            screenWakeLockWanted = false;
+            if (screenWakeLock) await screenWakeLock.release().catch(function() {});
+            screenWakeLock = null;
+            screenWakeLockButton.setAttribute('aria-pressed', 'false');
+            screenWakeLockStatus.textContent = 'Screen can sleep normally.';
+          } else {
+            screenWakeLockWanted = true;
+            await requestScreenWakeLock();
+          }
+        });
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible' && screenWakeLockWanted && !screenWakeLock) requestScreenWakeLock();
+        });
+
         let sidebarHideTimer;
         document.addEventListener('mousemove', function(event) {
           if (!document.body.classList.contains('sidebar-autohide')) return;
@@ -3825,15 +3998,40 @@
 
         const mobileNavToggle = document.getElementById('mobile-nav-toggle');
         const mobileNavScrim = document.getElementById('mobile-nav-scrim');
+        const mobileNavSidebar = document.getElementById('main-sidebar');
+        const mobileNavMedia = window.matchMedia('(max-width: 640px), (max-height: 500px) and (pointer: coarse)');
         function setMobileNavOpen(open) {
-          document.body.classList.toggle('mobile-nav-open', open);
-          mobileNavToggle.setAttribute('aria-expanded', String(open));
-          mobileNavToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+          const isOpen = mobileNavMedia.matches && open;
+          document.body.classList.toggle('mobile-nav-open', isOpen);
+          mobileNavToggle.setAttribute('aria-expanded', String(isOpen));
+          mobileNavToggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+          document.getElementById('mobile-more-button').setAttribute('aria-expanded', String(isOpen));
+          if (mobileNavMedia.matches) {
+            mobileNavSidebar.setAttribute('aria-hidden', String(!isOpen));
+            if (isOpen) mobileNavSidebar.removeAttribute('inert');
+            else mobileNavSidebar.setAttribute('inert', '');
+          } else {
+            mobileNavSidebar.removeAttribute('aria-hidden');
+            mobileNavSidebar.removeAttribute('inert');
+          }
         }
+        setMobileNavOpen(false);
         mobileNavToggle.addEventListener('click', function() {
           setMobileNavOpen(!document.body.classList.contains('mobile-nav-open'));
         });
+        document.getElementById('mobile-nav-close').addEventListener('click', function() { setMobileNavOpen(false); });
         mobileNavScrim.addEventListener('click', function() { setMobileNavOpen(false); });
+        document.getElementById('mobile-more-button').addEventListener('click', function() {
+          setMobileNavOpen(!document.body.classList.contains('mobile-nav-open'));
+        });
+        document.getElementById('mobile-map-menu').addEventListener('click', function() {
+          document.getElementById('map-button').click();
+          setMobileNavOpen(false);
+        });
+        document.getElementById('mobile-export-menu').addEventListener('click', function() {
+          document.getElementById('export-button').click();
+          setMobileNavOpen(false);
+        });
         document.querySelector('.sidebar').addEventListener('click', function(event) {
           if (event.target.closest('.menu-item')) setMobileNavOpen(false);
         });

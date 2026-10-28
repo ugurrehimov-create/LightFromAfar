@@ -89,7 +89,7 @@ The provider integrations are wired in the client, but this workspace cannot ins
 - Profile coordinates use a Unicode degree escape and the close control uses a plain `X`, avoiding mojibake.
 - Password recovery only exposes the new-password form after Supabase reports a valid `PASSWORD_RECOVERY` session. It does not ask for the current password; expired or unrecognized links prompt the user to request another reset email.
 - During recovery-link verification, the sign-in form stays hidden; once verified, only the new-password and confirmation fields are shown.
-- Service-worker cache name remains v34; the updated files are refreshed within the existing v34 app shell.
+- Service-worker cache name is `light-from-afar-shell-v34-mobile-field`; this refreshes the app shell in the existing v34 project.
 - Added UTF-8 charset metadata to the main page and standardized website close controls to an ASCII `X`.
 - The main app is `index.html`; `astralog.html` remains as a small legacy redirect so previously sent confirmation links continue to work and retain their auth tokens.
 - Aladin Lite now loads asynchronously from jsDelivr with the official host as fallback. If both map hosts fail, the application controls still load and the map area explains the outage instead of blocking the page.
@@ -101,3 +101,13 @@ The provider integrations are wired in the client, but this workspace cannot ins
 - CSS braces balance: `astralog.css` 484/484; `auth.css` 48/48.
 - Every service-worker app-shell file exists. The original optional local `aladin.js` file is still absent and continues to use the app's existing external CDN fallback.
 - Browser rendering, real Supabase email delivery, confirmation and recovery links, database RLS execution, Google OAuth, and Apple OAuth still require configured credentials and browser testing.
+
+## Phone observing layout
+- The phone bottom bar prioritizes Mark, Planning, Observe, and Log, with secondary destinations under More. Map survey selection, export, gallery, marks, settings, and community workspaces remain available in the drawer.
+- The top bar keeps search, profile, and red night vision available while giving the sky map most of the screen.
+- Planning renders this device's cached event list immediately, then refreshes it. The first three planning cards with coordinates load their DSS previews eagerly; later previews load as they approach view. Missing coordinates and image-service failures receive an explicit placeholder.
+- Planning event cards use a narrow preview column beside the event details on phones, preventing image/text overlap.
+- Observe includes an opt-in Screen Wake Lock control where the browser supports it. It releases when the tab is backgrounded and resumes when the tab returns.
+- The mobile layout follows common field-use patterns in current astronomy apps: quick access to tonight's plan, red night viewing, target conditions, and a screen-awake field mode. Sources: [SkySafari feature chart](https://skysafariastronomy.com/pages/comparison-chart), [Dark Skies field mode](https://apps.apple.com/us/app/dark-skies-astrophotography/id843351673), and [Celestron SkyPortal](https://www.celestron.com/pages/skyportal-mobile-app).
+- Planning now summarizes the site's 21:00–03:00 forecast for cloud cover, precipitation chance, wind, temperature, humidity, and the air-to-dew-point gap from Open-Meteo. That gap is only atmospheric context, not an equipment dew sensor or a dew-control recommendation. Weather models do not provide transparency or seeing here, and this site forecast cannot tell whether a cloud lies along a particular target line. [Open-Meteo hourly variable definitions](https://open-meteo.com/en/docs).
+- A real iPhone/Android browser review is still needed for visual spacing, wake-lock availability, map gestures, external DSS image delivery, and connected hardware controls.
