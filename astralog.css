@@ -1997,3 +1997,226 @@ body.community-view { padding-bottom:0; }
 .lightfromafar-modal {
   box-shadow: inset 0 -14px 22px rgba(5,4,15,.72);
 }
+
+/* Phone layout: keep the sky visible and put navigation within thumb reach. */
+.mobile-nav-toggle,
+.mobile-nav-scrim { display: none; }
+
+@media (max-width: 640px) {
+  .body {
+    min-height: 100dvh;
+    padding: calc(96px + env(safe-area-inset-top)) 0 calc(60px + env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  .topbar {
+    display: grid;
+    grid-template-columns: 36px 36px minmax(48px, 1fr) 34px 36px;
+    grid-template-rows: 40px 38px;
+    column-gap: 4px;
+    row-gap: 3px;
+    align-content: start;
+    height: calc(96px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 10px 6px;
+  }
+
+  .mobile-nav-toggle {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(255,126,66,.28);
+    border-radius: 9px;
+    color: #ffb38c;
+    background: rgba(255,126,66,.08);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .telescope-icon { grid-column: 2; grid-row: 1; width: 36px; height: 36px; }
+  .brand-lockup { display: none; }
+  .header { grid-column: 3; grid-row: 1; width: 100%; min-width: 0; margin: 0; }
+  .search-container { width: 100%; }
+  .search-bar { width: 100%; height: 38px; padding-left: 36px; font-size: 16px; }
+  .search-button { left: 9px; }
+
+  .topbar-button { grid-row: 2; width: 100%; min-width: 0; }
+  .topbar-button[data-workspace="home"] { grid-column: 1 / 3; }
+  .topbar-button[data-workspace="explore"] { grid-column: 3; }
+  .topbar-button[data-workspace="connect"] { grid-column: 4 / 6; }
+  .topbar-button .home-icon,
+  .topbar-button .explore-icon,
+  .topbar-button .connect-icon {
+    width: 100%;
+    height: 36px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  .home-icon div,
+  .explore-icon div,
+  .connect-icon div { margin-left: 5px; font-size: 12px; }
+
+  .topbar-right {
+    grid-column: 4 / 6;
+    grid-row: 1;
+    justify-content: flex-end;
+    gap: 5px;
+    margin: 0;
+  }
+  .screen-mode-button,
+  .profile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+  }
+  .night-icon { display: grid; place-items: center; margin: 0; }
+  .profile-icon { display: grid; place-items: center; padding: 0; }
+
+  .sky-map-wrapper {
+    width: 100%;
+    height: calc(100dvh - 156px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: 180px;
+    touch-action: pan-x pan-y;
+  }
+
+  .bottombar {
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: calc(60px + env(safe-area-inset-bottom));
+    padding: 0 4px env(safe-area-inset-bottom);
+    justify-content: center;
+    background: rgba(11,8,29,.97);
+    backdrop-filter: blur(16px);
+  }
+  .bottom-left { width: 100%; margin: 0; gap: 0; }
+  .bottombar-button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 54px;
+    padding: 4px 1px;
+    flex-direction: column;
+    gap: 3px;
+    border-radius: 8px;
+    touch-action: manipulation;
+  }
+  .bottombar-button svg { width: 19px; height: 19px; padding: 0; }
+  .bottombar-button div { margin: 0; font-size: 9px; line-height: 1.1; white-space: nowrap; }
+
+  .sidebar {
+    z-index: 10003;
+    top: calc(96px + env(safe-area-inset-top));
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    width: min(310px, 86vw);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: rgba(12,9,31,.98);
+    backdrop-filter: blur(18px);
+    box-shadow: 14px 0 35px rgba(0,0,0,.38);
+    transform: translateX(-105%);
+    transition: transform .22s ease;
+  }
+  body.mobile-nav-open .sidebar,
+  body.mobile-nav-open.sidebar-autohide .sidebar { transform: translateX(0); }
+  body.sidebar-autohide .sidebar { transform: translateX(-105%); }
+  .sidebar-buttons { padding: 10px 8px; }
+  .sidebar-buttons .menu-item { min-height: 48px; height: auto; padding: 10px 12px; margin: 2px 0; }
+  .badge { right: 16px; }
+
+  .mobile-nav-scrim {
+    position: fixed;
+    inset: calc(96px + env(safe-area-inset-top)) 0 calc(60px + env(safe-area-inset-bottom));
+    z-index: 10002;
+    border: 0;
+    background: rgba(3,3,12,.52);
+    backdrop-filter: blur(2px);
+  }
+  body.mobile-nav-open .mobile-nav-scrim { display: block; }
+
+  .lightfromafar-modal {
+    left: 0;
+    top: calc(96px + env(safe-area-inset-top));
+    right: 0;
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    backdrop-filter: blur(8px);
+  }
+  .lightfromafar-modal-content,
+  .lightfromafar-small-modal,
+  .lightfromafar-community-modal,
+  .lightfromafar-gallery-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 100%;
+    padding: 17px 14px;
+    border-radius: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lightfromafar-modal-header { gap: 10px; padding-bottom: 11px; margin-bottom: 14px; }
+  .lightfromafar-modal-title { font-size: 19px; line-height: 1.25; }
+  .lightfromafar-modal-subtitle { font-size: 12px; line-height: 1.45; }
+  .lightfromafar-close-button,
+  .lightfromafar-panel-action,
+  .lightfromafar-side-panel-close { min-height: 42px; }
+  .lightfromafar-side-panel {
+    left: 0;
+    right: 0;
+    top: calc(96px + env(safe-area-inset-top));
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    width: 100%;
+    padding: 15px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lightfromafar-planning-toolbar { grid-template-columns: 1fr; }
+  .lightfromafar-planning-toolbar > *,
+  .lightfromafar-community-toolbar > *,
+  .lightfromafar-gallery-toolbar > * { min-width: 0; max-width: 100%; }
+  .lightfromafar-community-tabs { overflow-x: auto; padding-bottom: 4px; }
+  .lightfromafar-community-tab { flex: 0 0 auto; min-height: 42px; }
+  .lightfromafar-gallery-grid,
+  .lightfromafar-explore-local-grid { grid-template-columns: 1fr; }
+  .lightfromafar-mark-box { max-width: calc(100vw - 24px) !important; min-width: 0 !important; }
+
+  .lightfromafar-modal input,
+  .lightfromafar-modal select,
+  .lightfromafar-modal textarea,
+  .lightfromafar-side-panel input,
+  .lightfromafar-side-panel select,
+  .lightfromafar-side-panel textarea { max-width: 100%; font-size: 16px; }
+  .lightfromafar-modal button,
+  .lightfromafar-side-panel button { touch-action: manipulation; }
+
+  body.community-view .topbar,
+  body.community-view .bottombar { display: none !important; }
+  body.community-view .lightfromafar-community-modal {
+    position: fixed;
+    inset: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    padding: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar { grid-template-columns: 32px 32px minmax(42px,1fr) 30px 32px; column-gap: 3px; padding-left: 7px; padding-right: 7px; }
+  .mobile-nav-toggle, .telescope-icon { width: 32px; height: 34px; }
+  .topbar-right { gap: 3px; }
+  .screen-mode-button, .profile-button { width: 32px; min-width: 32px; height: 34px; }
+  .topbar-button .home-icon, .topbar-button .explore-icon, .topbar-button .connect-icon { padding-left: 3px; padding-right: 3px; }
+  .home-icon div, .explore-icon div, .connect-icon div { margin-left: 3px; font-size: 11px; }
+  .bottombar-button div { font-size: 8px; }
+}

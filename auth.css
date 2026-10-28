@@ -51,4 +51,21 @@ body.lfa-auth-page {
 .lfa-auth-config-note { margin:12px 0 0; padding:10px 11px; border:1px solid rgba(255,126,66,.2); border-radius:7px; color:#ffb38c; background:rgba(255,126,66,.055); font-size:10px; line-height:1.55; }
 .lfa-auth-footnote { margin:16px 0 0; padding-top:13px; border-top:1px solid rgba(255,255,255,.07); color:#8f92a1; font-size:10px; line-height:1.55; text-align:center; }
 .lfa-auth-footer { margin:20px 0 0; color:#8f92a1; font-size:10px; letter-spacing:.04em; text-align:center; }
-@media(max-width:520px) { .lfa-auth-shell { justify-content:flex-start; padding:24px 14px; } .lfa-auth-card { padding:22px 19px; border-radius:13px; } .lfa-auth-brand { margin-bottom:18px; } }
+@media(max-width:520px) {
+  .lfa-auth-page { min-height:100svh; }
+  .lfa-auth-shell { min-height:100svh; justify-content:center; padding:calc(20px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom)); }
+  .lfa-auth-card { width:100%; max-width:440px; padding:22px 19px; border-radius:13px; }
+  .lfa-auth-brand { margin-bottom:18px; font-size:19px; }
+  .lfa-auth-eyebrow { margin-top:20px; }
+  .lfa-auth-card h1 { font-size:25px; }
+  .lfa-auth-tab { min-height:44px; font-size:13px; }
+  .lfa-auth-provider, .lfa-auth-primary { min-height:48px; font-size:14px; }
+  .lfa-auth-field { margin-bottom:15px; }
+  .lfa-auth-field label { font-size:13px; }
+  .lfa-auth-field input { height:48px; font-size:16px; }
+  .lfa-auth-text-button { min-height:38px; font-size:12px; }
+  .lfa-auth-status { font-size:12px; }
+}
+@media(max-height:700px) and (max-width:520px) {
+  .lfa-auth-shell { justify-content:flex-start; }
+}
