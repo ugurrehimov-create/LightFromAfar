@@ -7,6 +7,20 @@
         Light from Afar
       </title>
       <link rel="stylesheet" href="astralog.css">
+      <style>
+        /* Keep the required Aladin attribution visible and clickable, but visually quieter. */
+        #aladin-lite-div a[href*="aladin"] {
+          opacity: 0.20;
+          filter: grayscale(1);
+          transition: opacity 160ms ease, filter 160ms ease;
+        }
+
+        #aladin-lite-div a[href*="aladin"]:hover,
+        #aladin-lite-div a[href*="aladin"]:focus-visible {
+          opacity: 1;
+          filter: none;
+        }
+      </style>
     </head>
     <body class="body">
 
@@ -987,7 +1001,7 @@
         <div class="lightfromafar-modal-content lightfromafar-small-modal">
           <div class="lightfromafar-modal-header"><div><div class="lightfromafar-modal-title">Sky survey</div><div class="lightfromafar-modal-subtitle">Choose the wavelength and survey view used by the sky map</div></div><button class="lightfromafar-close-button" id="map-close-button" type="button">X</button></div>
           <div class="lightfromafar-survey-list" id="survey-list"></div>
-          <div class="lightfromafar-account-notice">DSS Color is useful for general optical finding charts. Infrared surveys such as 2MASS and WISE can reveal dust and cool objects that optical imagery misses. Aladin Lite supports changing the base image survey through its API. <span class="lightfromafar-source-note">Survey IDs follow the official Aladin Lite documentation.</span></div>
+          <div class="lightfromafar-account-notice">DSS Color is useful for general optical finding charts. Infrared surveys such as 2MASS and WISE can reveal dust and cool objects that optical imagery misses. Aladin Lite supports changing the base image survey through its API. <span class="lightfromafar-source-note">Surveys are loaded from verified ESA HiPS endpoints.</span></div>
         </div>
       </div>
 
@@ -1003,59 +1017,81 @@
             <div class="lightfromafar-account-details"><div><span>Email</span><strong id="account-email-value"></strong></div><div><span>Sign-in method</span><strong id="account-provider-value"></strong></div><div><span>Observing site</span><strong id="account-site-value"></strong></div><div><span>Coordinates</span><strong id="account-coordinates-value"></strong></div></div>
             <div class="lightfromafar-field"><label for="account-display-name">Display name</label><input id="account-display-name" type="text" maxlength="80" autocomplete="name"></div>
             <div class="lightfromafar-profile-actions"><button class="lightfromafar-btn lightfromafar-btn-edit" id="account-save-profile-button" type="button">Save profile</button><button class="lightfromafar-btn lightfromafar-btn-edit" id="account-observer-button" type="button">Observer settings</button><button class="lightfromafar-btn lightfromafar-btn-delete" id="account-signout-button" type="button">Sign out</button></div>
+            <div class="lightfromafar-account-notice">Your account and display name are online. Your marks, equipment, plans, observing logs, and gallery are still stored in this browser; cross-device data sync is not enabled yet.</div>
             <div class="lightfromafar-community-status" id="account-signed-in-status" role="status"></div>
           </div>
         </div>
       </div>
 
       <div id="night-overlay"></div>
+            <script>
+        // Aladin Lite loader: restore the CDN-first route used by v34.4,
+        // the last supplied build with the map's original working loader.
+        // Do not set window.A until a candidate module has initialized.
+        window.__lightFromAfarAladinReady = (async function () {
+          const moduleSources = [
+            'https://cdn.jsdelivr.net/npm/aladin-lite@3.9.2-beta/dist/aladin.js',
+            'https://unpkg.com/aladin-lite@3.9.2-beta/dist/aladin.js'
+          ];
+          const withTimeout = function (promise, ms, label) {
+            let timer;
+            return Promise.race([
+              Promise.resolve(promise),
+              new Promise(function (_, reject) {
+                timer = setTimeout(function () { reject(new Error(label + ' timed out after ' + ms + ' ms')); }, ms);
+              })
+            ]).finally(function () { clearTimeout(timer); });
+          };
+          let lastError = null;
 
-      <script>
-        window.__lightFromAfarAladinReady = (function () {
-          let settled = false;
-          let fallbackStarted = false;
-          let primaryAccepted = false;
-          let finish;
-          const ready = new Promise(function (resolve) { finish = resolve; });
-          const timeout = window.setTimeout(function () { finishReady(false); }, 15000);
-
-          function finishReady(available) {
-            if (settled) return;
-            settled = true;
-            window.clearTimeout(timeout);
-            finish(available);
+          for (const url of moduleSources) {
+            try {
+              const module = await withTimeout(import(url), 20000, 'Aladin module download (' + url + ')');
+              const candidate = module && (module.default || module.A || module);
+              if (!candidate || typeof candidate.aladin !== 'function' || !candidate.init) {
+                throw new Error('Aladin module did not expose the expected v3 API: ' + url);
+              }
+              await withTimeout(candidate.init, 30000, 'Aladin WASM/WebGL initialization');
+              window.A = candidate;
+              console.info('[Light from Afar] Aladin Lite initialized from ' + url);
+              return candidate;
+            } catch (error) {
+              lastError = error;
+              console.error('[Light from Afar] Aladin CDN source failed:', url, error);
+            }
           }
 
-          function acceptLibrary(library, fromFallback) {
-            if (settled || (fallbackStarted && !fromFallback) || !library || !library.init) return;
-            if (!fromFallback) primaryAccepted = true;
-            window.A = library;
-            Promise.resolve(library.init).then(function () {
-              finishReady(true);
-            }).catch(function () {
-              if (fromFallback) finishReady(false);
-              else startOfficialFallback();
-            });
+          // Final fallback: official CDS browser bundle. This is attempted only
+          // after both independent package CDNs fail, never concurrently.
+          const officialSources = [
+            'https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js',
+            'https://aladin.u-strasbg.fr/AladinLite/api/v3/latest/aladin.js'
+          ];
+          for (const url of officialSources) {
+            try {
+              await withTimeout(new Promise(function (resolve, reject) {
+                const script = document.createElement('script');
+                script.src = url;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = function () { reject(new Error('Browser could not download ' + url)); };
+                document.head.appendChild(script);
+              }), 20000, 'Aladin script download (' + url + ')');
+              const candidate = window.A;
+              if (!candidate || typeof candidate.aladin !== 'function' || !candidate.init) {
+                throw new Error('Official script loaded without exposing the expected Aladin API: ' + url);
+              }
+              await withTimeout(candidate.init, 30000, 'Aladin WASM/WebGL initialization');
+              console.info('[Light from Afar] Aladin Lite initialized from ' + url);
+              return candidate;
+            } catch (error) {
+              lastError = error;
+              console.error('[Light from Afar] Official Aladin source failed:', url, error);
+            }
           }
-
-          function startOfficialFallback() {
-            if (settled || fallbackStarted) return;
-            fallbackStarted = true;
-            const script = document.createElement('script');
-            script.src = 'https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js';
-            script.async = true;
-            script.onload = function () { acceptLibrary(window.A, true); };
-            script.onerror = function () { finishReady(false); };
-            document.head.appendChild(script);
-          }
-
-          window.setTimeout(function () {
-            if (!primaryAccepted) startOfficialFallback();
-          }, 5000);
-          import('https://cdn.jsdelivr.net/npm/aladin-lite@3.9.2-beta/dist/aladin.js')
-            .then(function (module) { acceptLibrary(module.default || module); })
-            .catch(startOfficialFallback);
-          return ready;
+          window.__lightFromAfarAladinError = lastError || new Error('All Aladin Lite sources failed.');
+          console.error('[Light from Afar] All Aladin Lite sources failed.', window.__lightFromAfarAladinError);
+          return null;
         })();
       </script>
       <script src="auth-config.js"></script>
@@ -1085,10 +1121,47 @@
         let markedMarkerObjects = [];
         let mapContainer;
         let surveySwitchToken = 0;
-        const supportedSurveyIds = new Set(['P/DSS2/color','P/DSS2/red','P/DSS2/blue','P/PanSTARRS/DR1/color','P/2MASS/color','P/allWISE/color']);
-        const savedSurvey = localStorage.getItem('lightfromafar-survey');
-        if (!supportedSurveyIds.has(savedSurvey)) localStorage.setItem('lightfromafar-survey', 'P/DSS2/color');
-        const markedStars = JSON.parse(localStorage.getItem('lightfromafar-marked-stars') || '[]');
+        // Aladin Lite's survey API expects the short HiPS IDs used by the
+        // previously working v34.9 build (for example P/DSS2/color). Passing
+        // registry-qualified CDS/P/... IDs leaves the grid visible but the
+        // background survey blank in the Aladin build used by this page.
+        const supportedSurveyIds = new Set([
+          'P/DSS2/color',
+          'P/2MASS/color',
+          'P/GAIA/DR3-RGB'
+        ]);
+        const authReturnNeedsMapRefresh = sessionStorage.getItem('lfa-auth-map-refresh') === '1';
+        if (authReturnNeedsMapRefresh) {
+          sessionStorage.removeItem('lfa-auth-map-refresh');
+          // A survey chosen before auth may not survive the browser's cached WebGL
+          // page restore. Reopen the known-good survey on the fresh auth return.
+          localStorage.setItem('lightfromafar-survey', 'P/DSS2/color');
+        }
+        // v34.13 briefly stored registry-qualified IDs. Convert those back to
+        // the short IDs expected by Aladin Lite while preserving the selection.
+        const savedSurveyRaw = localStorage.getItem('lightfromafar-survey');
+        const savedSurveyId = savedSurveyRaw && savedSurveyRaw.startsWith('CDS/') ? savedSurveyRaw.slice(4) : savedSurveyRaw;
+        const savedSurvey = savedSurveyId === 'P/PanSTARRS/DR1/color-i-r-g' ? 'P/PanSTARRS/DR1/color' : savedSurveyId;
+        const initialSurveyId = !authReturnNeedsMapRefresh && supportedSurveyIds.has(savedSurvey) ? savedSurvey : 'P/DSS2/color';
+        if (savedSurvey !== savedSurveyRaw || !supportedSurveyIds.has(savedSurvey)) {
+          localStorage.setItem('lightfromafar-survey', initialSurveyId);
+        }
+        // A page restored from the back-forward cache can retain a dead WebGL canvas.
+        // Reload only on a BFCache restore or after a confirmed WebGL context loss.
+        window.addEventListener('pageshow', function(event) {
+          const contextLost = sessionStorage.getItem('lfa-map-context-lost') === '1';
+          if (event.persisted || contextLost) {
+            sessionStorage.removeItem('lfa-map-context-lost');
+            window.location.reload();
+          }
+        });
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible' && sessionStorage.getItem('lfa-map-context-lost') === '1') {
+            sessionStorage.removeItem('lfa-map-context-lost');
+            window.location.reload();
+          }
+        });
+        const markedStars = (function() { try { const value = JSON.parse(localStorage.getItem('lightfromafar-marked-stars') || '[]'); return Array.isArray(value) ? value : []; } catch (error) { console.warn('Saved marks could not be parsed; starting with an empty mark list.', error); return []; } })();
 
         function saveMarks() {
           localStorage.setItem('lightfromafar-marked-stars', JSON.stringify(markedStars));
@@ -1111,16 +1184,16 @@
           container.appendChild(notice);
         }
 
-        window.__lightFromAfarAladinReady.then(function (mapAvailable) {
-          if (!mapAvailable || !window.A || !window.A.init) {
-            showMapUnavailable();
+        window.__lightFromAfarAladinReady.then(function (aladinApi) {
+          if (!aladinApi) {
+            const reason = window.__lightFromAfarAladinError && window.__lightFromAfarAladinError.message;
+            showMapUnavailable(reason ? 'The sky map could not load: ' + reason : 'The sky map could not initialize. The browser could not complete Aladin Lite loading or WebGL setup. Check the console for the exact error.');
             return;
           }
-          return A.init.then(() => {
+          window.A = aladinApi;
           aladin = A.aladin('#aladin-lite-div', {
-            target: '40.4093, 49.8671',
             fov: 35,
-            survey: supportedSurveyIds.has(localStorage.getItem('lightfromafar-survey')) ? localStorage.getItem('lightfromafar-survey') : 'P/DSS2/color',
+            survey: 'https://skies.esac.esa.int/DSSColor',
             cooFrame: 'ICRSd',
             showReticle: true,
             showCooGrid: true,
@@ -1145,6 +1218,9 @@
             showProjectionControl: false,
             reticleColor: '#ff5a5f'
           });
+          // Use the documented numeric-coordinate API instead of passing a
+          // comma-delimited coordinate string through the name resolver.
+          aladin.gotoRaDec(40.4093, 49.8671);
 
           // aladin.addCatalog(gaiaStars);
 
@@ -1157,6 +1233,9 @@
 
           mapContainer = document.getElementById('aladin-lite-div');
           mapContainer.classList.add('lightfromafar-aladin');
+          mapContainer.addEventListener('webglcontextlost', function() {
+            sessionStorage.setItem('lfa-map-context-lost', '1');
+          }, true);
 
           markedCatalog = A.catalog({
             name: 'Light from Afar Marks',
@@ -1285,25 +1364,101 @@
               }
             );
           }, true);
+          if (authReturnNeedsMapRefresh) {
+            try {
+              const layerRefresh = applySurveyLayer(initialSurveyId);
+              if (layerRefresh && typeof layerRefresh.catch === 'function') {
+                layerRefresh.catch(function(error) { console.warn('Could not refresh the sky survey after sign-in:', error); });
+              }
+            } catch (error) {
+              console.warn('Could not refresh the sky survey after sign-in:', error);
+            }
+          }
+          // Force a real layout measurement after Aladin has been attached.
+          // This avoids initializing WebGL while the map's parent is still settling.
+          (authReturnNeedsMapRefresh ? [0, 180, 650, 1200] : [0, 180, 650]).forEach(function(delay) {
+            window.setTimeout(function() {
+              if (!aladin || !mapContainer) return;
+              const rect = mapContainer.getBoundingClientRect();
+              if (rect.width > 0 && rect.height > 0 && typeof aladin.setSize === 'function') {
+                aladin.setSize();
+                if (authReturnNeedsMapRefresh && typeof aladin.gotoRaDec === 'function') aladin.gotoRaDec(40.4093, 49.8671);
+              }
+            }, delay);
           });
-        }).catch(function () {
-          showMapUnavailable('The sky survey could not initialize. Other Light from Afar tools are still available.');
+          window.addEventListener('resize', function() {
+            window.requestAnimationFrame(function() {
+              if (aladin && mapContainer && typeof aladin.setSize === 'function') aladin.setSize();
+            });
+          });
+        }).catch(function (error) {
+          console.error('Light from Afar could not initialize Aladin Lite:', error);
+          showMapUnavailable('The sky map could not initialize: ' + (error && error.message ? error.message : 'unknown initialization error') + '. Check the browser console for details.');
         });
 
-        function searchStar() {
+        async function searchStar() {
           const input = document.getElementById('star-search');
-          const name = input.value.trim();
+          const name = input.value.normalize('NFKC').replace(/\s+/g, ' ').trim();
 
-          if (!name || !aladin) return;
+          if (!name) return;
 
-          aladin.gotoObject(name, {
-            success: function(raDec) {
-              aladin.setFov(5);
-            },
-            error: function() {
-              alert('Star or astronomical object not found.');
+          if (!aladin) {
+            alert('The sky map is still initializing. Please try again in a moment.');
+            return;
+          }
+
+          const button = document.getElementById('search-star-button');
+
+          button.disabled = true;
+          input.setAttribute('aria-busy', 'true');
+
+          const controller = new AbortController();
+          const timeout = window.setTimeout(() => controller.abort(), 15000);
+
+          try {
+            const url =
+              'https://mastresolver.stsci.edu/Santa-war/query?name=' +
+              encodeURIComponent(name) +
+              '&outputFormat=JSON';
+
+            const response = await fetch(url, {
+              signal: controller.signal
+            });
+
+            if (!response.ok) {
+              throw new Error('Object resolver returned HTTP ' + response.status);
             }
-          });
+
+            const data = await response.json();
+            const object = data?.resolvedCoordinate?.[0];
+
+            if (
+              !object ||
+              !Number.isFinite(Number(object.ra)) ||
+              !Number.isFinite(Number(object.decl))
+            ) {
+              throw new Error('No valid coordinates found for this object.');
+            }
+
+            aladin.gotoRaDec(Number(object.ra), Number(object.decl));
+
+            if (typeof aladin.setFov === 'function') {
+              aladin.setFov(5);
+            }
+
+          } catch (error) {
+            console.warn('Astronomical object search failed:', name, error);
+
+            alert(
+              'Could not resolve “' + name +
+              '”. Check the spelling or try another astronomical designation.'
+            );
+
+          } finally {
+            window.clearTimeout(timeout);
+            button.disabled = false;
+            input.removeAttribute('aria-busy');
+          }
         }
 
         document.getElementById('search-star-button').addEventListener('click', searchStar);
@@ -1367,17 +1522,10 @@
         }
 
         function renderMarkedMarkers() {
-          if (!markedCatalog) return;
-          try { markedCatalog.removeAll(); } catch (error) {
-            markedMarkerObjects.forEach(function(item) { try { markedCatalog.remove(item.marker); } catch (e) {} });
-          }
-          markedMarkerObjects = [];
-          markedStars.forEach(function(star) {
-            if (!star.id) star.id = 'mark-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-            const marker = A.marker(star.ra, star.dec, { color: '#ff7e42', sourceSize: 20, shape: 'cross' });
-            markedCatalog.addSources([marker]);
-            markedMarkerObjects.push({ id: star.id, marker: marker });
-          });
+          if (!aladin || !A || typeof A.catalog !== 'function' || !markedCatalog) return;
+          // Keep the original registered catalog. Remove each known source with Aladin's
+          // documented Catalog.remove(source) method, then add exactly the saved sources.
+          refreshMarksLayer();
           saveMarks();
         }
 
@@ -1404,33 +1552,73 @@
           return nearestIndex;
         }
 
+        function refreshMarksLayer() {
+          if (!aladin || !A || typeof A.catalog !== 'function') return;
+          // Use Aladin's documented Catalog.remove(source) API so the source is removed
+          // from the exact layer that owns it; avoid removeCatalog/re-add races.
+          if (markedCatalog && typeof markedCatalog.remove === 'function') {
+            markedMarkerObjects.forEach(function(item) {
+              try { markedCatalog.remove(item.marker); } catch (error) { console.warn('Could not remove an old mark source.', error); }
+            });
+          }
+          markedMarkerObjects = [];
+          markedStars.forEach(function(star) {
+            if (!star.id) star.id = 'mark-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+            const marker = A.marker(Number(star.ra), Number(star.dec), { color: '#ff7e42', sourceSize: 20, shape: 'cross' });
+            markedCatalog.addSources([marker]);
+            markedMarkerObjects.push({ id: star.id, marker: marker });
+          });
+          // A no-op view update prompts Aladin to repaint without generating a user click.
+          try {
+            const center = typeof aladin.getRaDec === 'function' ? aladin.getRaDec() : null;
+            if (center && typeof aladin.gotoRaDec === 'function') aladin.gotoRaDec(center[0], center[1]);
+            if (typeof aladin.setSize === 'function') aladin.setSize();
+          } catch (error) { /* Data is already updated; repaint is best-effort. */ }
+        }
+
         function removeMarkById(id, options) {
           options = options || {};
-          const markerIndex = markedMarkerObjects.findIndex(function(item) {
-            return item.id === id;
-          });
-
-          if (markerIndex !== -1) {
-            try { markedCatalog.remove(markedMarkerObjects[markerIndex].marker); } catch (error) {}
-            markedMarkerObjects.splice(markerIndex, 1);
-          }
-
-          const starIndex = markedStars.findIndex(function(star) {
-            return star.id === id;
-          });
-
-          if (starIndex !== -1) markedStars.splice(starIndex, 1);
+          const starIndex = markedStars.findIndex(function(star) { return star.id === id; });
+          if (starIndex === -1) return false;
+          const removedStar = markedStars[starIndex];
+          const markerEntry = markedMarkerObjects.find(function(item) { return item.id === id; });
+          markedStars.splice(starIndex, 1);
           if (markingSessionMarkId === id) markingSessionMarkId = null;
-          renderMarkedMarkers();
-          closeMarkBox();
           if (!options.silent && currentTarget && currentTarget.id === id) {
-            clearFov();
-            currentTarget = null;
-            currentTargetObject = null;
-            closeTarget();
+            clearFov(); currentTarget = null; currentTargetObject = null; closeTarget();
           }
+          closeMarkBox();
+          // Remove the exact source immediately, then rebuild only as a fallback.
+          let removedFromLayer = false;
+          try {
+            if (markerEntry && markedCatalog && typeof markedCatalog.remove === 'function') {
+              markedCatalog.remove(markerEntry.marker);
+              removedFromLayer = true;
+            }
+          } catch (error) { console.warn('Direct mark removal failed; rebuilding marks layer.', error); }
+          markedMarkerObjects = markedMarkerObjects.filter(function(item) { return item.id !== id; });
           saveMarks();
+          if (!removedFromLayer) refreshMarksLayer();
+          renderMarksList();
           renderTonightSession();
+          updateProfileStats();
+          // Rebuild on the next frame to clear any stale WebGL hit-test/render state.
+          window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(function() {
+              if (markedCatalog && typeof markedCatalog.removeAll === 'function') {
+                try {
+                  // The removed source is already absent from markedStars; a same-layer
+                  // rebuild prevents an orphaned visual when Aladin retains a stale source.
+                  refreshMarksLayer();
+                } catch (error) { console.warn('Final mark refresh failed.', error); }
+              }
+              closeMarkBox();
+              renderMarksList();
+              renderTonightSession();
+              updateProfileStats();
+            });
+          });
+          return true;
         }
 
         function raToHMS(ra) {
@@ -1481,8 +1669,8 @@
 
           if (star.objectName || star.otype || (star.mag !== null && star.mag !== undefined && !isNaN(star.mag))) {
             html += '<div class="lightfromafar-info-section">';
-            if (star.objectName) html += '<div class="lightfromafar-info-row"><span class="lightfromafar-info-label">Object name</span><span class="lightfromafar-info-value lightfromafar-info-highlight">' + star.objectName + '</span></div>';
-            if (star.otype) html += '<div class="lightfromafar-info-row"><span class="lightfromafar-info-label">Object type</span><span class="lightfromafar-info-value">' + star.otype + '</span></div>';
+            if (star.objectName) html += '<div class="lightfromafar-info-row"><span class="lightfromafar-info-label">Object name</span><span class="lightfromafar-info-value lightfromafar-info-highlight">' + escapeHtml(star.objectName) + '</span></div>';
+            if (star.otype) html += '<div class="lightfromafar-info-row"><span class="lightfromafar-info-label">Object type</span><span class="lightfromafar-info-value">' + escapeHtml(star.otype) + '</span></div>';
             if (star.mag !== null && star.mag !== undefined && !isNaN(star.mag)) html += '<div class="lightfromafar-info-row"><span class="lightfromafar-info-label">V magnitude</span><span class="lightfromafar-info-value">' + star.mag + '</span></div>';
             html += '</div><div class="lightfromafar-info-divider"></div>';
           }
@@ -1497,7 +1685,7 @@
         }
 
         function buildMarkEditContent(star) {
-          return '<input type="text" id="lightfromafar-mark-name-input" value="' + star.name.replace(/"/g, '&quot;') + '"><div class="lightfromafar-mark-buttons"><button id="lightfromafar-mark-save-btn" class="lightfromafar-btn lightfromafar-btn-edit">Save</button><button id="lightfromafar-mark-cancel-btn" class="lightfromafar-btn lightfromafar-btn-delete">Cancel</button></div>';
+          return '<input type="text" id="lightfromafar-mark-name-input" value="' + escapeHtml(star.name) + '"><div class="lightfromafar-mark-buttons"><button id="lightfromafar-mark-save-btn" class="lightfromafar-btn lightfromafar-btn-edit">Save</button><button id="lightfromafar-mark-cancel-btn" class="lightfromafar-btn lightfromafar-btn-delete">Cancel</button></div>';
         }
 
         function showMarkEditBox(markIndex, mode) {
@@ -1509,7 +1697,7 @@
 
           const box = document.createElement('div');
           box.className = 'lightfromafar-mark-box';
-          box.innerHTML = '<div class="lightfromafar-mark-box-header"><span>' + (mode === 'view' ? star.name : 'Edit Mark') + '</span><button class="lightfromafar-mark-box-close">X</button></div><div class="lightfromafar-mark-box-content">' + (mode === 'view' ? buildMarkViewContent(star) : buildMarkEditContent(star)) + '</div>';
+          box.innerHTML = '<div class="lightfromafar-mark-box-header"><span>' + (mode === 'view' ? escapeHtml(star.name) : 'Edit Mark') + '</span><button class="lightfromafar-mark-box-close">X</button></div><div class="lightfromafar-mark-box-content">' + (mode === 'view' ? buildMarkViewContent(star) : buildMarkEditContent(star)) + '</div>';
           mapContainer.appendChild(box);
           activeMarkBox = box;
           // The popup is layered over Aladin's map. Stop pointer events bubbling back
@@ -1546,9 +1734,6 @@
               event.preventDefault();
               event.stopPropagation();
               removeMarkById(star.id);
-              // Complete the same visual dismissal a click on empty map space would cause,
-              // but do it synchronously enough that the user never sees a stale mark popup.
-              window.requestAnimationFrame(function() { closeMarkBox(); });
             });
           } else {
             box.querySelector('#lightfromafar-mark-save-btn').addEventListener('click', function() {
@@ -1579,6 +1764,8 @@
           markedStars.length = 0;
           closeMarkBox();
           saveMarks();
+          // Clear the catalog's rendered source list as well as persistent state.
+          refreshMarksLayer();
         }
 
         function setSidebarActive(id) {
@@ -2185,45 +2372,89 @@
 
         const surveyChoices = [
           ['P/DSS2/color', 'DSS2 Color', 'Optical color · general finding charts'],
-          ['P/DSS2/red', 'DSS2 Red', 'Optical red-sensitive survey'],
-          ['P/DSS2/blue', 'DSS2 Blue', 'Optical blue-sensitive survey'],
-          ['P/PanSTARRS/DR1/color', 'Pan-STARRS Color', 'Deep modern optical color'],
           ['P/2MASS/color', '2MASS', 'Near-infrared · dust and cool stars'],
-          ['P/allWISE/color', 'AllWISE', 'Mid-infrared · dust and cool objects']
+          ['P/GAIA/DR3-RGB', 'Gaia DR3 RGB', 'Optical · Gaia DR3 all-sky composite']
         ];
         let galleryEditingId = null;
         function getGalleryItems() { try { return JSON.parse(localStorage.getItem('lightfromafar-gallery') || '[]'); } catch (e) { return []; } }
         function saveGalleryItems(items) { localStorage.setItem('lightfromafar-gallery', JSON.stringify(items)); }
         function galleryEsc(v) { return escapeHtml(String(v == null ? '' : v)); }
+        function makeSurveyLayer(id) {
+          if (!aladin) throw new Error('Sky map is not initialized.');
+          if (typeof aladin.newImageSurvey === 'function') return aladin.newImageSurvey(id);
+          throw new Error('This Aladin Lite build does not support survey creation.');
+        }
+        async function applySurveyLayer(id) {
+          if (!aladin) throw new Error('Sky map is not initialized.');
+
+          const surveyUrls = {
+            'P/DSS2/color': 'https://skies.esac.esa.int/DSSColor',
+            'P/2MASS/color': 'https://skies.esac.esa.int/2MASSColor',
+            'P/GAIA/DR3-RGB': 'https://skies.esac.esa.int/Gaia/dr3/RGB'
+          };
+
+          const url = surveyUrls[id];
+          if (!url) throw new Error('Unknown sky survey: ' + id);
+
+          if (typeof aladin.setImageSurvey !== 'function') {
+            throw new Error('Aladin Lite does not support setImageSurvey.');
+          }
+
+          // Verify that the HiPS service exists before switching.
+          const controller = new AbortController();
+          const timeout = window.setTimeout(() => controller.abort(), 7000);
+
+          try {
+            const response = await fetch(url + '/properties', {
+              signal: controller.signal
+            });
+
+            if (!response.ok) {
+              throw new Error('Survey returned HTTP ' + response.status + ': ' + url);
+            }
+          } catch (error) {
+            if (error.name === 'AbortError') {
+              throw new Error('Survey metadata check timed out: ' + url);
+            }
+            throw error;
+          } finally {
+            window.clearTimeout(timeout);
+          }
+
+          return aladin.setImageSurvey(url);
+        }
         function renderSurveyChoices() {
           const list = document.getElementById('survey-list'); if (!list) return;
-          const current = supportedSurveyIds.has(localStorage.getItem('lightfromafar-survey')) ? localStorage.getItem('lightfromafar-survey') : 'P/DSS2/color';
+          const stored = localStorage.getItem('lightfromafar-survey');
+          const current = supportedSurveyIds.has(stored) ? stored : initialSurveyId;
           list.innerHTML = surveyChoices.map(function(item) { return '<button type="button" class="lightfromafar-survey-choice' + (item[0] === current ? ' active' : '') + '" data-survey="' + item[0] + '"><span><b>' + item[1] + '</b><small>' + item[2] + '</small></span><span>›</span></button>'; }).join('');
-          list.querySelectorAll('[data-survey]').forEach(function(button) { button.addEventListener('click', function() {
+          list.querySelectorAll('[data-survey]').forEach(function(button) { button.addEventListener('click', async function() {
             const id = this.dataset.survey;
-            if (!aladin) return;
+            if (!aladin || !supportedSurveyIds.has(id)) return;
             const token = ++surveySwitchToken;
+            const previous = supportedSurveyIds.has(localStorage.getItem('lightfromafar-survey')) ? localStorage.getItem('lightfromafar-survey') : initialSurveyId;
             try {
-              // Aladin's documented v3 API accepts a HiPS ID directly. Use that first;
-              // only fall back to constructing a layer if an older/custom build rejects it.
-              if (typeof aladin.setImageSurvey === 'function') {
-                aladin.setImageSurvey(id);
-              } else if (typeof aladin.newImageSurvey === 'function' && typeof aladin.setBaseImageLayer === 'function') {
-                aladin.setBaseImageLayer(aladin.newImageSurvey(id));
-              } else {
-                throw new Error('This Aladin Lite build does not support survey switching.');
-              }
+              await applySurveyLayer(id);
               localStorage.setItem('lightfromafar-survey', id);
               renderSurveyChoices();
-              // The close is deliberately deferred until the layer call has returned and
-              // Aladin has received the selection, preventing the modal from racing it.
-              window.requestAnimationFrame(function() {
+              closeAllContentWindows();
+              // Aladin's WebGL viewport can briefly have zero dimensions while its modal closes.
+              [80, 240, 600].forEach(function(delay) {
                 window.setTimeout(function() {
-                  if (token === surveySwitchToken) closeAllContentWindows();
-                }, 40);
+                  if (token !== surveySwitchToken || !aladin) return;
+                  try {
+                    if (typeof aladin.setSize === 'function') aladin.setSize();
+                    if (typeof aladin.gotoRaDec === 'function') {
+                      const center = aladin.getRaDec && aladin.getRaDec();
+                      if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) aladin.gotoRaDec(center[0], center[1]);
+                    }
+                  } catch (resizeError) { console.warn('Aladin viewport refresh failed.', resizeError); }
+                }, delay);
               });
             } catch (error) {
               console.error('Light from Afar: survey change failed', error);
+              try { await applySurveyLayer(previous); localStorage.setItem('lightfromafar-survey', previous); renderSurveyChoices(); }
+              catch (fallbackError) { console.error('Could not restore the previous sky survey.', fallbackError); }
             }
           }); });
         }
@@ -2424,7 +2655,7 @@
           const rotation = Number(document.getElementById('target-rotation').value) || 0;
           fovOverlay.add(A.polygon(fovCorners(currentTarget.ra, currentTarget.dec, metrics.fovWidth, metrics.fovHeight, rotation)));
           aladin.gotoRaDec(currentTarget.ra, currentTarget.dec);
-          aladin.setFoV(Math.max(metrics.fovWidth, metrics.fovHeight) * 3);
+          aladin.setFov(Math.max(metrics.fovWidth, metrics.fovHeight) * 3);
           closeTarget();
         }
 
@@ -2615,6 +2846,18 @@
         window.addEventListener('offline', function() { const el = document.getElementById('planning-source-status'); if (el) el.textContent = 'Offline: using cached data where available. Live sky-map/catalogue services need internet.'; });
         let planningLoading = false;
         let planningLastUpdated = null;
+
+        function updatePlanningLiveClock() {
+          const updated = document.getElementById('planning-updated');
+          if (!updated) return;
+          const now = new Date();
+          updated.textContent = 'Live · ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          updated.title = planningLastUpdated && !isNaN(planningLastUpdated)
+            ? 'Current local time. Event data last fetched ' + planningLastUpdated.toLocaleString() + '.'
+            : 'Current local time. Event data has not yet been refreshed successfully.';
+        }
+        updatePlanningLiveClock();
+        window.setInterval(updatePlanningLiveClock, 1000);
 
         function getObserverProfile() {
           return JSON.parse(localStorage.getItem('lightfromafar-profile') || JSON.stringify({
@@ -2848,13 +3091,13 @@
           }
           if (cachedAvailable) {
             if (status) status.textContent = 'Showing saved events while live sky data refreshes…';
-            if (updated) updated.textContent = 'Saved planning data';
+            if (updated) { updated.title = 'Showing cached planning events while live data refreshes.'; updatePlanningLiveClock(); }
           } else {
             list.innerHTML = '<div class="lightfromafar-planning-empty">Loading live sky events…</div>';
             if (status) status.textContent = navigator.onLine === false
               ? 'Browser is offline. Cached planning data will appear if this device has any.'
               : 'Connecting to live event data…';
-            if (updated) updated.textContent = 'Loading live events…';
+            if (updated) { updated.title = 'Loading current event data.'; updatePlanningLiveClock(); }
           }
 
           const controller = new AbortController();
@@ -2884,9 +3127,14 @@
             planningEvents = data.events.map(function(event) {
               const date = new Date(event.time);
               const position = event.position || {};
+              // Some event feeds serialize coordinates as strings. Normalize both forms
+              // before calculating altitude or requesting a survey cutout.
+              const raValue = position.ra_deg == null || position.ra_deg === '' ? NaN : Number(position.ra_deg);
+              const decValue = position.dec_deg == null || position.dec_deg === '' ? NaN : Number(position.dec_deg);
+              const hasSkyCoordinates = Number.isFinite(raValue) && Number.isFinite(decValue) && raValue >= 0 && raValue <= 360 && decValue >= -90 && decValue <= 90;
               let local = null;
-              if (typeof position.ra_deg === 'number' && typeof position.dec_deg === 'number') {
-                local = altAzFromRaDec(position.ra_deg, position.dec_deg, date, Number(profile.latitude), Number(profile.longitude));
+              if (hasSkyCoordinates) {
+                local = altAzFromRaDec(raValue, decValue, date, Number(profile.latitude), Number(profile.longitude));
               }
               return {
                 id: event.id || (event.kind + '-' + event.time + '-' + (event.title || '')),
@@ -2895,8 +3143,8 @@
                 type: planningEventType(event.kind),
                 kind: event.kind,
                 target: eventTargetLabel(event),
-                ra: typeof position.ra_deg === 'number' ? position.ra_deg : null,
-                dec: typeof position.dec_deg === 'number' ? position.dec_deg : null,
+                ra: hasSkyCoordinates ? raValue : null,
+                dec: hasSkyCoordinates ? decValue : null,
                 altitude: local ? local.altitude : null,
                 azimuth: local ? local.azimuth : null,
                 setup: eventSetup(event.kind),
@@ -2920,7 +3168,7 @@
                 usedCache = true;
                 const cachedDate = cached.savedAt ? new Date(cached.savedAt) : null;
                 if (status) status.textContent = 'Live event service unavailable · showing cached events' + (cachedDate && !isNaN(cachedDate) ? ' from ' + cachedDate.toLocaleString() : '');
-                if (updated) updated.textContent = 'Cached event data';
+                if (updated) { updated.title = 'Live service unavailable; showing cached event data.'; updatePlanningLiveClock(); }
                 renderPlanning();
               }
             } catch (cacheError) {
@@ -2930,7 +3178,7 @@
               planningEvents = [];
               list.innerHTML = '<div class="lightfromafar-planning-empty">Live events could not be reached. This is the event service, not your telescope connection. Press Refresh to try again.</div>';
               if (status) status.textContent = 'Live event service unavailable';
-              if (updated) updated.textContent = 'Unavailable';
+              if (updated) { updated.title = 'Live event service unavailable; no cached events are available.'; updatePlanningLiveClock(); }
             }
           } finally {
             clearTimeout(timeout);
@@ -2950,7 +3198,21 @@
         }
 
         function planningSaved() {
-          return JSON.parse(localStorage.getItem('lightfromafar-planning-events') || '[]');
+          try { const value = JSON.parse(localStorage.getItem('lightfromafar-planning-events') || '[]'); return Array.isArray(value) ? value : []; }
+          catch (error) { console.warn('Saved planning list could not be parsed; treating it as empty.', error); return []; }
+        }
+
+        function updatePlanningSavedUI() {
+          const saved = planningSaved();
+          const savedSet = new Set(saved.map(String));
+          document.getElementById('planning-saved-count').textContent = saved.length;
+          document.querySelectorAll('#planning-list .lightfromafar-event-card[data-event-id]').forEach(function(card) {
+            const button = card.querySelector('.lightfromafar-plan-button');
+            if (!button) return;
+            const isSaved = savedSet.has(String(card.dataset.eventId));
+            button.classList.toggle('saved', isSaved);
+            button.textContent = isSaved ? 'Planned' : 'Add to plan';
+          });
         }
 
         function savePlanning(eventId) {
@@ -2958,36 +3220,282 @@
           const index = saved.indexOf(eventId);
           if (index === -1) saved.push(eventId); else saved.splice(index, 1);
           localStorage.setItem('lightfromafar-planning-events', JSON.stringify(saved));
-          renderPlanning();
+          // Update only plan state. Do not destroy/recreate event cards or reload their images.
+          updatePlanningSavedUI();
           renderPlannedEventsForLog();
           updateProfileStats();
         }
 
         function clearPlanning() {
           localStorage.removeItem('lightfromafar-planning-events');
-          renderPlanning();
+          // Clear only the user's saved plan; leave event cards and successfully loaded photos untouched.
+          updatePlanningSavedUI();
           renderPlannedEventsForLog();
           updateProfileStats();
         }
 
+        const planningImageSearchCache = new Map();
+        const planningPreviewUrlCache = new Map();
+        const planningPreviewActive = new Map();
+        let planningPreviewObserver = null;
+        let planningPreviewQueue = [];
+        let planningPreviewActiveCount = 0;
+        const PLANNING_PREVIEW_MAX_ACTIVE = 3;
+
         function targetPreviewHtml(event, eager) {
           const rawRa = event && event.ra, rawDec = event && event.dec;
-          if (rawRa == null || rawDec == null || rawRa === '' || rawDec === '') {
-            return '<div class="lightfromafar-target-preview is-unavailable"><span>No coordinates for sky preview</span></div>';
-          }
-          const ra = Number(rawRa), dec = Number(rawDec);
-          if (!Number.isFinite(ra) || !Number.isFinite(dec)) {
-            return '<div class="lightfromafar-target-preview is-unavailable"><span>Sky preview unavailable</span></div>';
-          }
+          const ra = rawRa == null || rawRa === '' ? NaN : Number(rawRa);
+          const dec = rawDec == null || rawDec === '' ? NaN : Number(rawDec);
+          const hasCoordinates = Number.isFinite(ra) && Number.isFinite(dec) && ra >= 0 && ra <= 360 && dec >= -90 && dec <= 90;
           const rotation = Number(getAstroSettings().cameraRotation || 0);
-          const params = new URLSearchParams({
-            hips: 'CDS/P/DSS2/color', width: '220', height: '150', projection: 'TAN',
-            fov: '2.5', ra: String(ra), dec: String(dec), coordsys: 'icrs',
-            rotation_angle: String(Number.isFinite(rotation) ? rotation : 0), format: 'jpg',
-            min_cut: '1%', max_cut: '99%', stretch: 'asinh'
-          });
           const loading = eager ? 'eager' : 'lazy';
-          return '<div class="lightfromafar-target-preview is-loading"><img loading="' + loading + '" decoding="async" fetchpriority="low" width="220" height="150" referrerpolicy="no-referrer" src="https://alasky.cds.unistra.fr/hips-image-services/hips2fits?' + params.toString() + '" alt="DSS preview of ' + escapeHtml(event.target || event.name || 'target') + '"><span>Loading sky preview…</span></div>';
+          const label = String((event && (event.name || event.target || event.kind)) || 'astronomy event');
+          const query = String([event && event.name, event && event.target, event && event.kind].filter(Boolean).join(' ')).slice(0, 180);
+          const previewKey = encodeURIComponent(String((event && event.id) || (label + '|' + (hasCoordinates ? ra + ',' + dec : query))));
+          const cachedUrl = planningPreviewUrlCache.get(previewKey) || '';
+          const altText = escapeHtml(label);
+          return '<div class="lightfromafar-target-preview' + (cachedUrl ? '' : ' is-loading') + '" data-preview-key="' + previewKey + '" data-preview-has-coordinates="' + (hasCoordinates ? 'true' : 'false') + '" data-preview-ra="' + (hasCoordinates ? ra : '') + '" data-preview-dec="' + (hasCoordinates ? dec : '') + '" data-preview-rotation="' + (Number.isFinite(rotation) ? rotation : 0) + '" data-preview-query="' + escapeHtml(query).replace(/'/g, '&#39;') + '"><img ' + (cachedUrl ? 'src="' + escapeHtml(cachedUrl) + '"' : '') + ' loading="' + loading + '" decoding="async" width="320" height="190" alt="Astronomy image for ' + altText + '"><span>' + (cachedUrl ? 'ASTRONOMY IMAGE' : 'Finding an astronomy image…') + '</span></div>';
+        }
+
+        function planningCommonsImage(query) {
+          const normalized = String(query || 'astronomy').trim().replace(/\s+/g, ' ').slice(0, 150) || 'astronomy';
+          const cacheKey = normalized.toLowerCase();
+          if (planningImageSearchCache.has(cacheKey)) return planningImageSearchCache.get(cacheKey);
+          const promise = (async function() {
+            const searchTerms = [normalized];
+            for (let i = 0; i < searchTerms.length; i++) {
+              try {
+                const params = new URLSearchParams({
+                  action: 'query', generator: 'search', gsrsearch: 'filetype:bitmap ' + searchTerms[i],
+                  gsrnamespace: '6', gsrlimit: '8', prop: 'imageinfo', iiprop: 'url|mime',
+                  iiurlwidth: '640', format: 'json', origin: '*'
+                });
+                const controller = new AbortController();
+                const timer = window.setTimeout(function() { controller.abort(); }, 2800);
+                let response;
+                try { response = await fetch('https://commons.wikimedia.org/w/api.php?' + params.toString(), { signal: controller.signal, mode: 'cors', credentials: 'omit' }); }
+                finally { clearTimeout(timer); }
+                if (!response.ok) continue;
+                const data = await response.json();
+                const pages = data && data.query && data.query.pages ? Object.values(data.query.pages) : [];
+                const suitable = pages.find(function(page) {
+                  const info = page.imageinfo && page.imageinfo[0];
+                  return info && (info.thumburl || info.url) && /^image\/(jpeg|png|webp)$/i.test(info.mime || 'image/jpeg') && !/\.svg(?:$|\?)/i.test(info.thumburl || info.url || '');
+                });
+                if (suitable) return suitable.imageinfo[0].thumburl || suitable.imageinfo[0].url;
+              } catch (error) { /* Try a broader search phrase or report a graceful failure. */ }
+            }
+            planningImageSearchCache.delete(cacheKey);
+            return null;
+          })();
+          planningImageSearchCache.set(cacheKey, promise);
+          return promise;
+        }
+
+        function queueTargetPreview(img, forceRetry) {
+          if (!img) return;
+          const preview = img.closest('.lightfromafar-target-preview');
+          if (!preview) return;
+          const key = preview.dataset.previewKey || preview.dataset.previewQuery || 'astronomy';
+          const cached = planningPreviewUrlCache.get(key);
+          if (cached && preview.dataset.previewLoaded !== 'true') {
+            preview.dataset.previewLoaded = 'true';
+            preview.classList.remove('is-loading', 'is-unavailable');
+            img.style.display = 'block';
+            img.src = cached;
+            const caption = preview.querySelector('span');
+            if (caption) caption.textContent = cached.indexOf('commons.wikimedia.org') !== -1 ? 'WIKIMEDIA COMMONS · ASTRONOMY IMAGE' : 'DSS2 SKY SURVEY';
+            return;
+          }
+          if (preview.dataset.previewLoaded === 'true') return;
+          if (preview.dataset.previewQueued === 'true' || preview.dataset.previewStarted === 'true') return;
+          preview.dataset.previewQueued = 'true';
+          planningPreviewQueue.push({ img: img, forceRetry: !!forceRetry });
+          pumpPlanningPreviewQueue();
+        }
+
+        function pumpPlanningPreviewQueue() {
+          while (planningPreviewActiveCount < PLANNING_PREVIEW_MAX_ACTIVE && planningPreviewQueue.length) {
+            const job = planningPreviewQueue.shift();
+            const preview = job.img && job.img.closest('.lightfromafar-target-preview');
+            if (!preview || !preview.isConnected || preview.dataset.previewLoaded === 'true') continue;
+            preview.dataset.previewQueued = 'false';
+            planningPreviewActiveCount++;
+            startTargetPreview(job.img, job.forceRetry).finally(function() {
+              planningPreviewActiveCount = Math.max(0, planningPreviewActiveCount - 1);
+              pumpPlanningPreviewQueue();
+            });
+          }
+        }
+
+        async function startTargetPreview(img, forceRetry) {
+          if (!img) return;
+          const preview = img.closest('.lightfromafar-target-preview');
+          if (!preview || preview.dataset.previewLoaded === 'true') return;
+          const key = preview.dataset.previewKey || preview.dataset.previewQuery || 'astronomy';
+          if (planningPreviewActive.has(key) && !forceRetry) {
+            await planningPreviewActive.get(key);
+            const sharedResult = planningPreviewUrlCache.get(key);
+            if (sharedResult && preview.isConnected) {
+              img.src = sharedResult;
+              preview.dataset.previewLoaded = 'true';
+              preview.dataset.previewStarted = 'false';
+              preview.classList.remove('is-loading', 'is-unavailable');
+              const sharedCaption = preview.querySelector('span');
+              if (sharedCaption) sharedCaption.textContent = sharedResult.indexOf('commons.wikimedia.org') !== -1 ? 'WIKIMEDIA COMMONS · ASTRONOMY IMAGE' : 'DSS2 SKY SURVEY';
+            }
+            return;
+          }
+          if (preview.dataset.previewStarted === 'true' && !forceRetry) return;
+          if (preview.dataset.previewRetryTimer) {
+            window.clearTimeout(Number(preview.dataset.previewRetryTimer));
+            preview.dataset.previewRetryTimer = '';
+          }
+          const cachedUrl = planningPreviewUrlCache.get(key);
+          if (cachedUrl) {
+            img.src = cachedUrl;
+            preview.dataset.previewLoaded = 'true';
+            preview.classList.remove('is-loading', 'is-unavailable');
+            const cachedCaption = preview.querySelector('span');
+            if (cachedCaption) cachedCaption.textContent = cachedUrl.indexOf('commons.wikimedia.org') !== -1 ? 'WIKIMEDIA COMMONS · ASTRONOMY IMAGE' : 'DSS2 SKY SURVEY';
+            return;
+          }
+          const hasCoordinates = preview.dataset.previewHasCoordinates === 'true';
+          const ra = Number(preview.dataset.previewRa), dec = Number(preview.dataset.previewDec);
+          const rotation = Number(preview.dataset.previewRotation || 0);
+          const query = preview.dataset.previewQuery || 'astronomy';
+          const caption = preview.querySelector('span');
+          const retryDelays = [4000, 10000, 25000, 45000, 60000];
+          let cycle = Math.max(0, Number(preview.dataset.previewRetryCycle || 0));
+          let settled = false;
+          preview.dataset.previewStarted = 'true';
+          preview.classList.remove('is-unavailable');
+          preview.classList.add('is-loading');
+          img.style.display = 'block';
+          if (caption) caption.textContent = cycle ? 'Retrying astronomy image…' : 'Finding astronomy image…';
+
+          const operation = (async function() {
+            function loadImageUrl(url, timeoutMs) {
+              return new Promise(function(resolve) {
+                const probe = new Image();
+                let done = false;
+                const timer = window.setTimeout(function() { finish(null); }, timeoutMs);
+                function finish(value) {
+                  if (done) return;
+                  done = true;
+                  window.clearTimeout(timer);
+                  probe.onload = probe.onerror = null;
+                  resolve(value);
+                }
+                probe.onload = function() { finish(url); };
+                probe.onerror = function() { finish(null); };
+                probe.decoding = 'async';
+                probe.src = url;
+                if (probe.complete && probe.naturalWidth > 0) finish(url);
+              });
+            }
+            async function raceCandidates(candidates, timeoutMs) {
+              if (!candidates.length) return null;
+              return new Promise(function(resolve) {
+                let remaining = candidates.length, done = false;
+                candidates.forEach(function(candidate) {
+                  loadImageUrl(candidate.url, timeoutMs).then(function(url) {
+                    if (done) return;
+                    if (url) { done = true; resolve({ url: url, source: candidate.source }); }
+                    else if (--remaining === 0) resolve(null);
+                  });
+                });
+              });
+            }
+            const candidates = [];
+            if (hasCoordinates && Number.isFinite(ra) && Number.isFinite(dec) && ra >= 0 && ra <= 360 && dec >= -90 && dec <= 90) {
+              const endpoints = ['https://alasky.cds.unistra.fr/hips-image-services/hips2fits', 'https://alaskybis.cds.unistra.fr/hips-image-services/hips2fits'];
+              ['P/DSS2/color', 'P/DSS2/red'].forEach(function(survey) {
+                endpoints.forEach(function(endpoint) {
+                  const params = new URLSearchParams({ hips: survey, width: '320', height: '190', projection: 'TAN', fov: '2.5', ra: String(ra), dec: String(dec), coordsys: 'icrs', rotation_angle: String(Number.isFinite(rotation) ? rotation : 0), format: 'jpg' });
+                  candidates.push({ url: endpoint + '?' + params.toString(), source: 'dss2' });
+                });
+              });
+            }
+            let found = null;
+            // Try two endpoints concurrently, then the alternate survey concurrently.
+            for (let i = 0; i < candidates.length && !found; i += 2) {
+              found = await raceCandidates(candidates.slice(i, i + 2), 2800);
+            }
+            if (!found) {
+              if (caption) caption.textContent = 'Checking astronomy image archive…';
+              try {
+                const commonsUrl = await planningCommonsImage(query);
+                if (commonsUrl) {
+                  const validCommons = await loadImageUrl(commonsUrl, 3200);
+                  if (validCommons) found = { url: validCommons, source: 'commons' };
+                  else planningImageSearchCache.delete(String(query || 'astronomy').trim().replace(/\s+/g, ' ').slice(0, 150).toLowerCase());
+                }
+              } catch (error) { /* Fall through to automatic retry. */ }
+            }
+            if (found) {
+              settled = true;
+              planningPreviewUrlCache.set(key, found.url);
+              preview.dataset.previewLoaded = 'true';
+              preview.dataset.previewStarted = 'false';
+              preview.dataset.previewRetryCycle = '0';
+              preview.classList.remove('is-loading', 'is-unavailable');
+              img.src = found.url;
+              img.style.display = 'block';
+              if (caption) caption.textContent = found.source === 'commons' ? 'WIKIMEDIA COMMONS · ASTRONOMY IMAGE' : 'DSS2 SKY SURVEY';
+              return;
+            }
+            preview.dataset.previewStarted = 'false';
+            preview.classList.remove('is-loading');
+            preview.classList.add('is-unavailable');
+            img.style.display = 'none';
+            if (caption) caption.textContent = 'Image temporarily unavailable · retrying automatically';
+            preview.dataset.previewRetryCycle = String(cycle + 1);
+            const delay = document.visibilityState === 'visible' ? retryDelays[Math.min(cycle, retryDelays.length - 1)] : 60000;
+            const timer = window.setTimeout(function() {
+              preview.dataset.previewRetryTimer = '';
+              if (preview.dataset.previewLoaded === 'true' || !preview.isConnected) return;
+              if (document.visibilityState === 'visible') queueTargetPreview(img, true);
+              else {
+                preview.dataset.previewRetryCycle = String(Math.max(1, Number(preview.dataset.previewRetryCycle || 1)));
+                preview.dataset.previewRetryTimer = String(window.setTimeout(function() { preview.dataset.previewRetryTimer = ''; if (preview.isConnected && preview.dataset.previewLoaded !== 'true') queueTargetPreview(img, true); }, 60000));
+              }
+            }, delay);
+            preview.dataset.previewRetryTimer = String(timer);
+          })();
+          planningPreviewActive.set(key, operation);
+          try { await operation; } finally { if (planningPreviewActive.get(key) === operation) planningPreviewActive.delete(key); }
+        }
+
+        function observePlanningPreview(img) {
+          if (!img) return;
+          if (img.dataset.previewErrorBound !== 'true') {
+            img.dataset.previewErrorBound = 'true';
+            img.addEventListener('error', function() {
+              const preview = img.closest('.lightfromafar-target-preview');
+              if (!preview || !preview.isConnected || preview.dataset.previewLoaded !== 'true') return;
+              const key = preview.dataset.previewKey || preview.dataset.previewQuery || 'astronomy';
+              planningPreviewUrlCache.delete(key);
+              preview.dataset.previewLoaded = 'false';
+              preview.dataset.previewStarted = 'false';
+              preview.classList.remove('is-loading');
+              preview.classList.add('is-unavailable');
+              const caption = preview.querySelector('span');
+              if (caption) caption.textContent = 'Image connection interrupted · retrying automatically';
+              window.setTimeout(function() { if (preview.isConnected && preview.dataset.previewLoaded !== 'true') queueTargetPreview(img, true); }, 900);
+            });
+          }
+          if (!planningPreviewObserver && 'IntersectionObserver' in window) {
+            planningPreviewObserver = new IntersectionObserver(function(entries) {
+              entries.forEach(function(entry) {
+                if (!entry.isIntersecting) return;
+                planningPreviewObserver.unobserve(entry.target);
+                queueTargetPreview(entry.target, false);
+              });
+            }, { root: document.getElementById('planning-list'), rootMargin: '320px 0px', threshold: 0.01 });
+          }
+          if (planningPreviewObserver) planningPreviewObserver.observe(img);
+          else queueTargetPreview(img, false);
         }
 
         function renderPlanning() {
@@ -3011,6 +3519,7 @@
           events.forEach(function(event, index) {
             const card = document.createElement('div');
             card.className = 'lightfromafar-event-card';
+            card.dataset.eventId = String(event.id);
             const days = planningDaysAway(event);
             const savedClass = saved.indexOf(event.id) !== -1 ? ' saved' : '';
             const minAlt = Number(getAstroSettings().minAltitude) || 20;
@@ -3020,38 +3529,25 @@
             card.innerHTML =
               '<div class="lightfromafar-event-date"><b>' + formatPlanningDate(event) + '</b><small>' + daysText + '</small>' + targetPreviewHtml(event, index < 3) + '</div>' +
               '<div class="lightfromafar-event-main">' +
-                '<div class="lightfromafar-event-title-row"><div><span class="lightfromafar-event-type">' + event.kind + '</span><h3>' + event.name + '</h3></div>' +
+                '<div class="lightfromafar-event-title-row"><div><span class="lightfromafar-event-type">' + escapeHtml(event.kind) + '</span><h3>' + escapeHtml(event.name) + '</h3></div>' +
                 '<button class="lightfromafar-plan-button' + savedClass + '" type="button">' + (savedClass ? 'Planned' : 'Add to plan') + '</button></div>' +
-                '<div class="lightfromafar-event-target">' + event.target + '</div>' +
+                '<div class="lightfromafar-event-target">' + escapeHtml(event.target) + '</div>' +
                 '<div class="lightfromafar-event-grid">' +
                   '<div><span>Local visibility</span><p>' + visibility + '</p></div>' +
                   '<div><span>Sky position</span><p>' + skyPosition + '</p></div>' +
-                  '<div><span>Suggested setup</span><p>' + event.setup + '</p></div>' +
-                  '<div class="lightfromafar-event-equipment"><span>For your equipment</span><p>' + equipmentAssessment(event) + '</p></div>' +
+                  '<div><span>Suggested setup</span><p>' + escapeHtml(event.setup) + '</p></div>' +
+                  '<div class="lightfromafar-event-equipment"><span>For your equipment</span><p>' + escapeHtml(equipmentAssessment(event)) + '</p></div>' +
                 '</div>' +
               '</div>';
             const preview = card.querySelector('.lightfromafar-target-preview');
             const previewImage = preview && preview.querySelector('img');
-            if (previewImage) {
-              previewImage.addEventListener('load', function() {
-                preview.classList.remove('is-loading');
-                const caption = preview.querySelector('span');
-                if (caption) caption.textContent = 'Target preview · DSS';
-              }, { once: true });
-              previewImage.addEventListener('error', function() {
-                preview.classList.remove('is-loading');
-                preview.classList.add('is-unavailable');
-                previewImage.remove();
-                const caption = preview.querySelector('span');
-                if (caption) caption.textContent = 'DSS preview unavailable';
-              }, { once: true });
-            }
             card.querySelector('.lightfromafar-plan-button').addEventListener('click', function() { savePlanning(event.id); });
             list.appendChild(card);
+            if (previewImage) observePlanningPreview(previewImage);
           });
 
-          const updated = document.getElementById('planning-updated');
-          if (updated) updated.textContent = planningLastUpdated ? 'Live · ' + planningLastUpdated.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Live';
+          updatePlanningSavedUI();
+          updatePlanningLiveClock();
         }
 
         function renderPlannedEventsForLog() {
@@ -3344,11 +3840,13 @@
           document.getElementById('hz-distance').value = planet.distance;
           document.getElementById('hz-eccentricity').value = planet.eccentricity;
 
-          if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-          window.addEventListener('load', function() { navigator.serviceWorker.register('./sw.js').catch(function(error) { console.warn('Offline shell registration failed:', error); }); });
+        calculateHZResult();
         }
 
-        calculateHZResult();
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+          navigator.serviceWorker.register('./sw.js').catch(function(error) {
+            console.warn('Offline shell registration failed:', error);
+          });
         }
 
         // Live data from the NASA Exoplanet Archive (TAP service, pscomppars table)
@@ -3769,14 +4267,16 @@
 
         document.getElementById('about-close-button').addEventListener('click', closeAllContentWindows);
         document.getElementById('friends-menu').addEventListener('click', function() {
-          closeAllContentWindows();
           const modal = document.getElementById('friends-modal');
+          if (modal.classList.contains('active')) { closeAllContentWindows(); return; }
+          closeAllContentWindows();
           modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
           setSidebarActive('friends-menu');
         });
         document.getElementById('chats-menu').addEventListener('click', function() {
-          closeAllContentWindows();
           const modal = document.getElementById('chats-modal');
+          if (modal.classList.contains('active')) { closeAllContentWindows(); return; }
+          closeAllContentWindows();
           modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
           setSidebarActive('chats-menu');
         });

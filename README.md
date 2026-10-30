@@ -1,8 +1,14 @@
-# Light from Afar v32 — Efficient Repair + Workflow Polish
+# Light from Afar v34.7 — Stable Aladin Map Recovery & Object Search
 
 Built directly from the supplied `astralog-v27.zip` baseline. This pass is intentionally surgical: existing features, UI structure, and local storage keys are preserved; only regressions and explicitly requested UI behavior were repaired.
 
-## Repairs
+## v34.7 repairs
+- Replaced the unstable v34.6 Aladin loader with a pinned stable Aladin Lite 3.8.2 ES-module-first loader and sequential official CDS fallbacks.
+- Initialize the map only after the Aladin WebAssembly initialization promise resolves; set the initial sky center with numeric RA/Dec coordinates.
+- Use Sesame object resolution for case-insensitive astronomical object search, with a corrected FoV API call.
+- Bump the service-worker cache to ensure clients receive the repaired shell.
+
+## Earlier repairs
 - Restored working Marks sidebar toggle by removing the duplicate generic sidebar listener.
 - Restored Map window toggle by removing the duplicate Map handler and keeping one authoritative handler.
 - Preserved Aladin survey switching and local survey selection.
@@ -111,3 +117,59 @@ The provider integrations are wired in the client, but this workspace cannot ins
 - The mobile layout follows common field-use patterns in current astronomy apps: quick access to tonight's plan, red night viewing, target conditions, and a screen-awake field mode. Sources: [SkySafari feature chart](https://skysafariastronomy.com/pages/comparison-chart), [Dark Skies field mode](https://apps.apple.com/us/app/dark-skies-astrophotography/id843351673), and [Celestron SkyPortal](https://www.celestron.com/pages/skyportal-mobile-app).
 - Planning now summarizes the site's 21:00–03:00 forecast for cloud cover, precipitation chance, wind, temperature, humidity, and the air-to-dew-point gap from Open-Meteo. That gap is only atmospheric context, not an equipment dew sensor or a dew-control recommendation. Weather models do not provide transparency or seeing here, and this site forecast cannot tell whether a cloud lies along a particular target line. [Open-Meteo hourly variable definitions](https://open-meteo.com/en/docs).
 - A real iPhone/Android browser review is still needed for visual spacing, wake-lock availability, map gestures, external DSS image delivery, and connected hardware controls.
+
+
+## v34.1 authentication audit + focused repairs
+
+### Repairs in this audit pass
+- Delayed Supabase authentication scripts on the standalone auth page with ordered `defer` loading. This lets the page markup render without waiting for the hosted auth SDK, while preserving script dependency order.
+- Extended password-recovery callback verification from 2 seconds to 12 seconds. Slow mobile connections should not be told almost immediately that a valid reset link is expired. If verification still fails, the message now distinguishes a verification failure from a definite expiry.
+- Added an explicit signed-in account notice: the online account currently stores authentication/profile information, while marks, equipment, plans, observing logs, and gallery remain browser-local. This prevents the UI from implying cross-device sync that is not implemented.
+- Bumped the service-worker cache so the repaired page and disclosure are delivered to existing installs.
+
+### Audit findings — what is implemented
+- Supabase email/password sign-up and sign-in client calls.
+- Email-confirmation return path.
+- Password-reset email request and recovery-session-gated password update.
+- Google and Apple OAuth client calls.
+- Persistent Supabase browser session, sign-out, and profile read/write path.
+- SQL profile table, user-scoped row-level security, and new-user profile trigger.
+- Public sky workspace remains usable without an account.
+
+### Still required before real users can register reliably
+1. **Verify the Supabase project**: confirm the project URL and browser-safe publishable key in `auth-config.js` are for the intended production project. The key is expected to be public/publishable; never put a service-role or secret key in the browser.
+2. **Run `supabase-profiles.sql`** in that project's SQL Editor and verify the table, trigger, and RLS policies were created successfully.
+3. **Configure Auth URL allow-lists** for the deployed HTTPS origin, `index.html`, and `auth.html?mode=recovery`. Add localhost URLs only for local testing.
+4. **Configure email delivery**. Test sign-up confirmation and password-reset messages from the actual deployed domain. A working Supabase project does not guarantee production email deliverability; configure SMTP as needed.
+5. **Configure Google and Apple providers** in Supabase and their respective developer consoles. Until that is done, those buttons are wired but not verified.
+6. **Run the live auth test matrix**: new email registration, duplicate registration, confirmation link, sign-in, wrong password, refresh persistence, sign-out, reset request, valid reset, expired reset, Google OAuth, Apple OAuth, and a second browser/device.
+7. **Add a privacy policy and account/data deletion route before public launch.** Decide what personal data is collected and how a user can request deletion.
+8. **Implement cloud data sync as a separate feature.** The current database schema does not sync marks, observatory equipment, optical trains, plans, logs, or gallery items. Do not promise cross-device backup until those tables/storage paths and per-user RLS policies exist.
+
+### Verification performed for v34.1
+- JavaScript syntax checks passed for the two non-empty inline scripts in `index.html`, plus `auth-page.js`, `supabase-client.js`, and `sw.js`.
+- Static markup audit: 260 IDs in `index.html` and 25 IDs in `auth.html`; no duplicate IDs; no unresolved `getElementById`, label `for`, or ARIA ID references.
+- Service-worker app-shell file references exist in the package.
+- ZIP integrity passed after packaging.
+- A live browser test could not be completed in this environment because Chromium failed to start; this pass does **not** claim successful visual/browser, live Supabase, email-delivery, database-policy, or OAuth testing.
+
+## v34.4 automatic retries, map survey recovery, and navigation polish
+
+- Planning image previews automatically retry the CDS endpoints and image archive with increasing backoff; retries pause when the Planning panel is closed or the tab is hidden.
+- Survey selection now uses the documented Aladin Lite base-layer API, closes the selector after the layer call, and triggers a viewport refresh with a DSS2 color fallback when no base layer is available.
+- Chat and Friends are toggles, so clicking an already-open one closes it and switching between them closes the previous panel.
+- Removed the Apple sign-in option from the authentication page. Google and email sign-in remain.
+- Updated the service-worker cache version to force clients to load v34.4 assets.
+
+Live external image/survey services still require verification in the deployed browser; syntax checks alone cannot prove their availability.
+
+
+
+## v34.6 map lifecycle and project audit
+- Corrected Aladin Lite v3 survey switching to create an image-survey object before applying the base layer.
+- Added back-forward-cache/WebGL context-loss recovery for the grey map after returning from authentication.
+- Reworked mark deletion to remove source objects through the documented catalogue API and reconcile the marks layer.
+- Made Planning image previews lazy, cached, concurrency-limited, faster to fail over, and automatically retried.
+- Decoupled Clear plan/Add to plan from event-card rendering so those actions no longer reset photos.
+- Escaped dynamic event/mark strings in the repaired UI surfaces.
+- See `V34.6-PROJECT-AUDIT.md` for remaining roadmap gaps and the recommended Connect implementation order.

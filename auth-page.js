@@ -14,6 +14,7 @@
     ? params.get('mode')
     : 'signin';
   let busy = false;
+  let appReturnStarted = false;
 
   function setStatus(message, kind) {
     status.textContent = message || '';
@@ -71,6 +72,9 @@
   }
 
   function returnToApp() {
+    if (appReturnStarted) return;
+    appReturnStarted = true;
+    try { sessionStorage.setItem('lfa-auth-map-refresh', '1'); } catch (error) {}
     window.location.replace(new URL('index.html', window.location.href).href);
   }
 
@@ -88,7 +92,8 @@
     if (busy) return;
     if (!showConfiguration()) return;
     setBusy(true);
-    setStatus('Opening ' + (provider === 'apple' ? 'Apple' : 'Google') + ' sign in…');
+    setStatus('Opening Google sign in…');
+    try { sessionStorage.setItem('lfa-auth-map-refresh', '1'); } catch (error) {}
     try {
       const redirectTo = new URL('index.html', window.location.href).href;
       const options = { redirectTo: redirectTo };
@@ -99,6 +104,7 @@
       });
       if (result.error) throw result.error;
     } catch (error) {
+      try { sessionStorage.removeItem('lfa-auth-map-refresh'); } catch (storageError) {}
       setBusy(false);
       setStatus(error.message || 'Could not start sign in.', 'error');
     }
@@ -212,7 +218,6 @@
   document.getElementById('signin-tab').addEventListener('click', function () { setMode('signin'); });
   document.getElementById('signup-tab').addEventListener('click', function () { setMode('signup'); });
   document.getElementById('google-signin').addEventListener('click', function () { signInWithProvider('google'); });
-  document.getElementById('apple-signin').addEventListener('click', function () { signInWithProvider('apple'); });
   document.getElementById('forgot-password').addEventListener('click', function () { setMode('forgot'); });
   document.getElementById('auth-cancel').addEventListener('click', function () { setMode('signin'); });
   document.getElementById('auth-form').addEventListener('submit', function (event) {
@@ -250,7 +255,7 @@
         if (!recoverySessionReady) {
           recoveryPending = false;
           setMode('signin');
-          setStatus('This password reset link is missing or expired. Request a new reset link and open it from your email.', 'error');
+          setStatus('We could not verify this reset link. Check your connection; if the link has expired, request a new one.', 'error');
         }
       }, 2000);
     }

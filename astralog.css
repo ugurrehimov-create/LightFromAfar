@@ -343,8 +343,15 @@
 #aladin-lite-div {
   width: 100%;
   height: 100%;
+  min-width: 1px;
+  min-height: 1px;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+}
+
+#aladin-lite-div canvas {
+  max-width: none !important;
 }
 
 .lightfromafar-map-unavailable {
@@ -376,8 +383,7 @@
 .lightfromafar-aladin .aladin-cooFrame,
 .lightfromafar-aladin .aladin-location,
 .lightfromafar-aladin .aladin-projection-control,
-.lightfromafar-aladin .aladin-zoomControl,
-.lightfromafar-aladin .aladin-logo {
+.lightfromafar-aladin .aladin-zoomControl {
   display: none !important;
 }
 
@@ -385,9 +391,6 @@
   color: #ff5a5f !important;
 }
 
-#aladin-lite-div .aladin-logo {
-  z-index: 20;
-}
 
 .bottombar-button div {
   margin-left: 6px;
@@ -703,8 +706,9 @@
 
 .lightfromafar-event-card {
   display: grid;
-  grid-template-columns: 105px 1fr;
-  gap: 14px;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 12px;
@@ -716,8 +720,10 @@
 }
 
 .lightfromafar-event-date {
+  min-width: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.07);
   padding-right: 12px;
+  box-sizing: border-box;
 }
 
 .lightfromafar-event-date b {
@@ -1113,14 +1119,15 @@
   }
 
   .lightfromafar-event-card {
-    grid-template-columns: 1fr;
+    grid-template-columns: 145px minmax(0, 1fr);
+    gap: 12px;
   }
 
   .lightfromafar-event-date {
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    padding-right: 0;
-    padding-bottom: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 0;
+    padding-right: 10px;
+    padding-bottom: 0;
   }
 
   .lightfromafar-event-grid {
@@ -1955,7 +1962,7 @@ body.community-view { padding-bottom:0; }
 .lightfromafar-target-preview { margin-top:9px; border:1px solid rgba(255,126,66,.18); border-radius:8px; overflow:hidden; background:rgba(0,0,0,.2); }
 .lightfromafar-target-preview img { display:block; width:100%; aspect-ratio:1.47; object-fit:cover; }
 .lightfromafar-target-preview span { display:block; padding:5px 7px; color:#8f92a1; font-size:9px; text-transform:uppercase; letter-spacing:.08em; }
-.lightfromafar-event-date .lightfromafar-target-preview { width:150px; }
+.lightfromafar-event-date .lightfromafar-target-preview { width:100%; max-width:100%; box-sizing:border-box; }
 .lightfromafar-auth-tabs { display:flex; gap:4px; padding:4px; margin-bottom:12px; border:1px solid rgba(255,255,255,.08); border-radius:9px; background:rgba(255,255,255,.025); }
 .lightfromafar-auth-tab { flex:1; border:1px solid transparent; border-radius:6px; background:transparent; color:#8f92a1; padding:8px 10px; cursor:pointer; }
 .lightfromafar-auth-tab.active { color:#ffb38c; border-color:rgba(255,126,66,.35); background:rgba(255,126,66,.1); }
@@ -2232,23 +2239,33 @@ body.community-view { padding-bottom:0; }
 
 @media (max-width: 640px), (max-height: 500px) and (pointer: coarse) {
   .lightfromafar-event-card:not(.lightfromafar-tonight-card) {
-    grid-template-columns: minmax(78px, 32%) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
-    gap: 10px;
-    padding: 10px;
+    gap: 12px;
+    padding: 12px;
   }
   .lightfromafar-event-date {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 8px;
     min-width: 0;
-    padding: 0 9px 0 0;
-    border-right: 1px solid rgba(255,255,255,.09);
-    border-bottom: 0;
+    padding: 0 0 10px 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.09);
     overflow-wrap: anywhere;
+  }
+  .lightfromafar-event-date .lightfromafar-target-preview {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
   }
   .lightfromafar-event-date b { font-size: 10px; line-height: 1.4; }
   .lightfromafar-event-date small { font-size: 10px; }
   .lightfromafar-event-date .lightfromafar-target-preview { width: 100%; }
   .lightfromafar-target-preview { position: relative; width: 100%; margin-top: 8px; }
-  .lightfromafar-target-preview img { aspect-ratio: 1.1; min-height: 62px; background: linear-gradient(135deg, rgba(44,22,84,.8), rgba(5,5,13,.95)); }
+  .lightfromafar-target-preview img { aspect-ratio: 2.15; max-height: 170px; min-height: 95px; object-fit: cover; background: linear-gradient(135deg, rgba(44,22,84,.8), rgba(5,5,13,.95)); }
   .lightfromafar-target-preview.is-loading::before {
     content: "Loading preview";
     position: absolute;
