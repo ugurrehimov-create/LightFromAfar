@@ -1,5 +1,5 @@
--- Run this in the Supabase SQL Editor before enabling account profiles.
--- Each authenticated user can read or change only their own profile row.
+-- run once in the project sql editor
+-- own row only
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,

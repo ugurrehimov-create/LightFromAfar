@@ -1491,7 +1491,7 @@
   .lightfromafar-profile-grid { grid-template-columns: 1fr; }
 }
 
-/* Compact macOS-style auto-hiding sidebar */
+/* sidebar hide thing */
 body.sidebar-autohide {
   padding-left: 0;
 }
@@ -1639,7 +1639,7 @@ body.sidebar-autohide::before {
   background: rgba(255,126,66,0.05);
 }
 
-/* Windows use the full width when the sidebar is hidden, so they stay centered */
+
 body.sidebar-autohide .lightfromafar-modal {
   left: 0;
 }
@@ -1662,7 +1662,7 @@ body.sidebar-autohide.sidebar-pinned .lightfromafar-modal {
   left: 250px;
 }
 
-/* Night mode: multiplying by pure red keeps only the red channel (rods barely see red light) */
+/* red layer, field mode */
 .screen-mode-button {
   cursor: pointer;
 }
@@ -1690,7 +1690,7 @@ body.night-mode #night-overlay {
   display: block;
 }
 
-/* Planning → Session Log workflow */
+
 .lightfromafar-session-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1710,7 +1710,7 @@ body.night-mode #night-overlay {
 }
 
 
-/* Community panels: Explore captures and Connect observation groups */
+
 .lightfromafar-community-modal { width: min(1040px, 96%); }
 .lightfromafar-community-toolbar { display: flex; gap: 10px; margin: 16px 0; }
 .lightfromafar-community-toolbar input, .lightfromafar-community-toolbar select { min-width: 0; padding: 11px 13px; border-radius: 7px; border: 1px solid rgba(226,228,233,.18); background: rgba(5,7,22,.58); color: #e2e4e9; font: inherit; }
@@ -1731,7 +1731,7 @@ body.night-mode #night-overlay {
 @media (max-width: 720px) { .lightfromafar-community-grid { grid-template-columns: 1fr; } .lightfromafar-community-toolbar { flex-direction: column; } .lightfromafar-community-toolbar select { width: 100%; } }
 
 
-/* v17: keep workspace panels between the fixed navigation bars */
+
 .lightfromafar-modal { z-index: 500; top: 64px; bottom: 58px; }
 .sidebar { z-index: 10000; }
 .topbar { z-index: 10001; }
@@ -1753,7 +1753,7 @@ body.community-view .sky-map-wrapper { visibility: hidden; }
 @media (max-width: 850px) { .community-scene { left: 0; } body.sidebar-autohide .community-scene { left: 0; } }
 
 
-/* v18: session history has its own readable layout rather than inheriting event-card columns. */
+
 .lightfromafar-session-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1796,11 +1796,11 @@ body.community-view .sky-map-wrapper { visibility: hidden; }
   .lightfromafar-session-card .lightfromafar-btn { grid-row: 3; justify-self: start; }
 }
 
-/* v20: all three workspace buttons use the same active-state contract */
+
 .topbar-button:not(.active) .home-icon, .topbar-button:not(.active) .explore-icon, .topbar-button:not(.active) .connect-icon { border-color: transparent; background: transparent; color: #8f92a1; }
 .topbar-button.active .home-icon svg { stroke: #ff7e42; }
 
-/* v21: session history tools stay compact and readable on desktop and mobile. */
+
 .lightfromafar-log-conditions { margin: 12px 0; padding: 12px 14px; border: 1px solid rgba(255,255,255,.09); border-radius: 10px; background: rgba(255,255,255,.025); }
 .lightfromafar-log-conditions summary { cursor: pointer; color: #d8d9e3; font-size: 13px; font-weight: 600; }
 .lightfromafar-log-conditions[open] summary { margin-bottom: 12px; }
@@ -1820,7 +1820,7 @@ body.community-view .sky-map-wrapper { visibility: hidden; }
 .lightfromafar-device-state { white-space:nowrap; font-size:11px; color:#ffb38c; }
 
 
-/* v25: compact marked-target planning cards and coherent mark actions. */
+
 .lightfromafar-tonight-card { display:block; padding:14px; }
 .lightfromafar-tonight-card .lightfromafar-event-main { min-width:0; }
 .lightfromafar-tonight-card .lightfromafar-event-title-row { align-items:center; }
@@ -1858,7 +1858,7 @@ body.community-view .sky-map-wrapper { visibility: hidden; }
 @media (max-width:900px) { .lightfromafar-tonight-card .lightfromafar-event-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .lightfromafar-observe-grid { grid-template-columns:1fr; } }
 @media (max-width:560px) { .lightfromafar-tonight-card .lightfromafar-event-title-row { align-items:flex-start; flex-direction:column; } .lightfromafar-tonight-card .lightfromafar-session-actions { justify-content:flex-start; } .lightfromafar-tonight-card .lightfromafar-event-grid { grid-template-columns:1fr; } .lightfromafar-sequence-row { grid-template-columns:1fr; } }
 
-/* v26: astrophotography workflow cleanup and control density. */
+
 .bottombar { justify-content: center; }
 .bottom-left { margin-left: 0; }
 .sidebar-buttons .menu-item { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
@@ -1879,7 +1879,7 @@ body.community-view .sky-map-wrapper { visibility: hidden; }
 @media (max-width:900px) { .bottombar { left:0; } .lightfromafar-observe-grid { grid-template-columns:1fr; } }
 @media (max-width:600px) { .bottombar-button { min-width:68px; padding-left:7px; padding-right:7px; } .lightfromafar-planned-log-row { align-items:flex-start; flex-direction:column; } .lightfromafar-capture-summary { align-items:flex-start; flex-direction:column; } }
 
-/* v27: map surveys, full-screen community scenes, active sidebar states, and Gallery. */
+
 .sidebar-buttons .menu-item.active { color:#ff7e42; background:rgba(255,126,66,.12); border-color:rgba(255,126,66,.4); }
 body.community-view .bottombar { display:none !important; }
 body.community-view .community-scene { bottom:0; }
@@ -1924,7 +1924,7 @@ body.community-view { padding-bottom:0; }
 @media (max-width:600px){ .lightfromafar-gallery-grid,.lightfromafar-explore-local-grid{grid-template-columns:1fr;} }
 
 
-/* v30: preserve the v27 visual system while making active controls consistent. */
+
 .profile-button.active { color:#ff7e42; background:rgba(255,126,66,.12); border-color:rgba(255,126,66,.45); }
 .profile-button.active .profile-icon { color:#ff7e42; }
 .lightfromafar-gallery-search, .lightfromafar-gallery-filter {
@@ -1942,7 +1942,7 @@ body.community-view { padding-bottom:0; }
 @media (max-width:600px) { .lightfromafar-gallery-toolbar { grid-template-columns:1fr; } }
 
 
-/* v32: restore the Light from Afar topbar lockup and make Gallery controls match the main controls. */
+
 .lightfromafar-gallery-toolbar { display:grid; grid-template-columns:auto minmax(260px,1fr) 180px; gap:10px; align-items:end; margin-bottom:14px; }
 .lightfromafar-gallery-toolbar-actions { display:flex; gap:8px; align-items:end; }
 .lightfromafar-gallery-filters { display:contents; }
@@ -1999,13 +1999,12 @@ body.community-view { padding-bottom:0; }
   .lightfromafar-gallery-toolbar-actions { grid-column:auto; }
 }
 
-/* v32: seal the modal backdrop against the bottom edge so the bright map strip
-   cannot show through immediately above the bottom control bar. */
+
 .lightfromafar-modal {
   box-shadow: inset 0 -14px 22px rgba(5,4,15,.72);
 }
 
-/* Phone layout: keep the sky visible and put navigation within thumb reach. */
+/* phone layout bits */
 .mobile-nav-toggle,
 .mobile-nav-scrim,
 .mobile-drawer-header,

@@ -28,8 +28,7 @@
         persistSession: true
       }
     });
-    // Subscribe immediately so the password-recovery event is recorded even
-    // before auth-page.js finishes loading.
+    // recovery event needs to get here early
     window.lightFromAfarAuth.recoverySubscription = window.lightFromAfarAuth.client.auth.onAuthStateChange(function (event) {
       if (event === 'PASSWORD_RECOVERY') window.lightFromAfarAuth.recoverySessionActive = true;
       else if (event === 'SIGNED_OUT') window.lightFromAfarAuth.recoverySessionActive = false;

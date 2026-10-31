@@ -1,5 +1,5 @@
 const CACHE_NAME = 'lightfromafar-v34.13-map-layer-repair-cache';
-// v34.13 map repair: restore Aladin's short HiPS IDs and identifier-based layer API.
+// map cache bump, survey fix
 const APP_SHELL = ['./', './index.html', './astralog.html', './astralog.css', './auth.html', './auth.css', './auth-page.js?v=34.13-cds-hips-id-repair', './auth-config.js', './supabase-client.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
