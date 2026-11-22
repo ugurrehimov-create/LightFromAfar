@@ -1,448 +1,321 @@
-# lightfromafar-v34.13
+# Light from Afar
 
-**A sky map, an astrophotography workspace, and a place to keep the nights that matter.**
+*An astronomy workspace built because looking up should lead somewhere.*
 
-Light from Afar is a project I am building because I want astronomy to feel a little less scattered.
+I started Light from Afar because I wanted astronomy to feel closer. The universe is enormous, but getting into it can feel surprisingly lonely and fragmented. You might find a beautiful object on a sky map, read about it somewhere else, calculate whether your telescope can frame it in another tool, check the weather on a different website, write down the session in a notes app, and then lose half the details a week later.
 
-When you get into astrophotography, the actual night is only one part of it. Before you even point a telescope, you might be switching between a planetarium, a sky atlas, equipment calculators, weather websites, event calendars, notes, spreadsheets and capture software. After the night, the images and the details of how you made them end up somewhere else again.
+I wanted to bring more of that journey into one place.
 
-I wanted to bring more of that process together.
+Light from Afar is a project about making the night sky easier to explore, understand, observe and share. It is also a personal attempt to build something that connects the scientific side of astronomy with the feeling that made me interested in it in the first place. I don't want the software to make astronomy feel like a checklist or turn every target into a score. I want it to help people look closer, ask better questions, and keep a record of what they discover.
 
-Light from Afar is meant to follow the whole journey: find something in the sky, understand what it is, see how it fits your equipment, decide when to observe it, work with your setup, record what happened and eventually share the result with other people.
+The project is still being built. Some parts are real tools already, some are early hardware experiments, and some are ideas that need a proper backend before they can become real. I would rather say that honestly than make the project look more finished than it is.
 
-It is still a work in progress. Some parts are already useful, some are experiments, and some are only the beginning of what I want them to become. I would rather say that clearly than pretend every button is already a finished service.
+## What it is
 
-## Why I am making this
+Light from Afar is the wider project and the name of the website. **AstraLog** is the name used for its astrophotography workspace and its earlier code history.
 
-The name is about more than looking at distant objects. Almost everything we see in astronomy is light that has travelled for a very long time before reaching us. A photograph of a nebula, a star or a galaxy is a tiny connection between something unimaginably far away and a person standing under the sky right now.
+The main idea behind AstraLog is to act as a mission-control layer for an observing or imaging session. It is not meant to replace dedicated image-processing software such as PixInsight or Siril, and it is not trying to rebuild a full planetarium. It should connect the steps around an imaging session:
 
-I like that idea.
+**Discover → Evaluate → Frame → Plan → Connect → Observe/Capture → Record → Review/Share**
 
-I also think astronomy can be lonely, especially when the people around you do not share the same interest. It is easy to spend hours learning things, planning observations and working on images without having many people nearby to talk to about any of it. I want Light from Afar to eventually make that easier too: not by turning astronomy into another social-media feed, but by giving people a reason to find each other through the things they actually observe and create.
+The sky map is the center of that workflow. A target should not be an isolated name in a list. It should connect to its position, visibility, the Moon, the observer's location, the equipment being used, the camera frame, the plan, and eventually the session record.
 
-The project has two sides that should keep supporting each other:
+The long-term goal is a workspace where the map, equipment, conditions, telescope state and imaging plan all refer to the same target. The current version is an early but usable step toward that.
 
-- **The practical side:** tools that help an astrophotographer prepare for and remember an observing session.
+## The project and its philosophy
 
-- **The human side:** a space where people can discover each other's work, exchange knowledge and plan observations together.
+There are a few things I want this project to stand for.
 
-I am not trying to build a replacement for every astronomy application. N.I.N.A., KStars/Ekos, Voyager, SharpCap, PixInsight and other specialised tools already do difficult jobs very well. Light from Afar is meant to sit around the workflow and connect its pieces.
+**The sky comes first.** The map is not decoration behind a dashboard. It is the place where the work begins. Selecting an object should lead naturally to its information, framing, observing conditions and next actions.
 
-A tool should be useful before it is impressive. A feature should solve a real problem before it earns a place in the interface.
+**Useful context is better than fake certainty.** A target can be above the horizon and still be a bad choice for a particular setup. A weather forecast can show cloud cover but cannot promise transparency or seeing. A camera can report that an exposure finished without the app having downloaded or inspected the image. The interface should show what it actually knows and where its information came from.
 
-## The idea behind the product
+**Tools should work together.** A field-of-view calculator is more useful when it knows the selected target and equipment. A plan is more useful when it can become a session log. A capture summary is more useful when it can pre-fill a record. The point is not to collect unrelated features; it is to make the steps connect.
 
-The sky map is the centre of the application. A target should not be an isolated name in a list. It should connect to its coordinates, catalogue information, field of view, equipment, visibility, Moon conditions, plan and eventually the session record.
+**Local work should remain possible.** The public sky workspace can be used without signing in. Most observing data is currently stored in the browser, so the user keeps control of it and can export backups. That also means it does not magically appear on another device. Cloud sync is a separate feature, not something I want to imply before it exists.
 
-## What is in the current build
+**People are not engagement metrics.** Explore and Connect are meant to help astrophotographers find each other's work and observe together. I am not interested in filling the app with fake users, fake posts, follower counts or empty social features. The community parts will only become real when the backend, privacy rules and moderation basics are ready.
 
-This README describes the source included in the **v34.13 recovery archive**. The application is browser-first and works without signing in for its public sky workspace.
+**Science should stay honest.** Calculations have assumptions and approximations. A framing preview is not a plate solve. A weather model is not a local sensor. A habitable-zone estimate is not proof that a planet is habitable. The app should make those limits visible.
 
-### 1. Sky map and object search
+I am building this because I want a place where the technical side of astrophotography and the curiosity behind astronomy can exist together. It is a long project, and I expect the software to change as I learn more.
 
-The main workspace is an interactive sky map powered by **Aladin Lite**.
+## What you can do right now
 
-The current source includes these survey choices:
+### 1. Explore the sky
 
-- DSS2 Color
+The main workspace is an interactive all-sky map powered by [Aladin Lite](https://aladin.cds.unistra.fr/AladinLite/).
 
-- 2MASS Color
+The current source includes these selectable surveys:
 
-- Gaia DR3 RGB
+- **DSS2 Color** — an optical colour view for general navigation and finding charts.
+- **2MASS** — near-infrared imagery, useful for looking through dust and seeing cooler stellar populations.
+- **Gaia DR3 RGB** — a Gaia-based all-sky composite.
 
-The map has survey switching, initial sky positioning, resize handling and recovery paths for certain WebGL and browser-history problems. If Aladin cannot load, the rest of the application is designed to remain available and show an explanation instead of silently leaving an empty map.
+The map remembers the selected survey locally. The app also includes map resize and recovery handling for browser history and WebGL context-loss situations. The map and its imagery still depend on external Aladin/CDS services and the browser's WebGL support.
 
-The top search field resolves astronomical object names and aliases through the Aladin/Sesame route. It is intended for looking up stars, nebulae, galaxies, clusters and other catalogued objects, then moving the map to the result.
+Object search uses astronomical name resolution and catalogue services. The app can resolve common object names and identifiers, then move the map to the returned coordinates. It also has a native Aladin resolver fallback for cases where the external catalogue lookup is unavailable.
 
-The sky map is not meant to be a replacement for every planetarium feature. It is the shared place where the rest of the astrophotography workflow starts.
+### 2. Mark targets and inspect them
 
-### 2. Marks and target details
+Mark mode lets you click the map and save sky positions as targets. Marks can be named, edited, revisited and deleted. They are kept in the browser and shown in a dedicated Marks panel.
 
-Mark mode lets you save positions directly from the map.
+A saved mark can be opened as a target. The target view can show:
 
-Saved marks can be:
+- Object identification and catalogue information when SIMBAD resolves it.
+- Coordinates and target details.
+- A target altitude graph for the observer's location.
+- Astronomical-night context.
+- Moon separation and illumination context.
+- Equipment-based framing guidance.
+- A camera field-of-view overlay on the sky map.
+- Frame rotation controls.
+- A route into the imaging plan or the telescope slew workflow.
 
-- Named and edited.
+The target information panel uses SIMBAD where available. Catalogue lookups need a network connection and may fail if the upstream service is unavailable.
 
-- Opened again from the Marks list.
+### 3. Work out what your equipment can frame
 
-- Sent to the target-details view.
+Settings includes an astrophotography setup with telescope/lens and camera information, including focal length, aperture, sensor dimensions and pixel size. The app uses these values for its equipment calculations.
 
-- Navigated to on the map.
+The current tools include:
 
-- Deleted individually or cleared together.
+- Field of view.
+- Image scale / pixel scale.
+- Focal ratio.
+- Target framing guidance.
+- A rotatable field-of-view outline on the map.
 
-- Exported as CSV or JSON.
+The optical-train area lets you save and activate more than one named train and assign discovered Alpaca devices to it. This is an early device-assignment model, not yet a complete optical compatibility engine. Reducers, barlows, extenders, filter offsets and every possible combination still need stronger modelling and validation.
 
-Target details can use **SIMBAD** to look up the selected object. The panel can show catalogue information, a visibility/altitude chart, Moon context and the current equipment's framing information.
+### 4. Plan an observing night
 
-The target workflow also includes a camera-frame overlay. It uses the saved sensor and telescope values to estimate the field of view, and it can apply a rotation angle so the observer can get a better idea of how a target sits inside the frame.
+The Planning workspace combines event information with the observer's location and equipment.
 
-### 3. Equipment and optical trains
+It currently includes:
 
-The basic equipment profile stores information such as:
+- Event retrieval from SpaceCatalog.
+- A locally cached event list so previously loaded information can appear before a refresh finishes.
+- Event filtering and refresh controls.
+- Event dates, target information and coordinate-based visibility calculations when coordinates are supplied.
+- Altitude and azimuth context.
+- Equipment guidance for supported event types.
+- Save-to-plan and clear-plan actions.
+- Image previews for events where a useful coordinate or search phrase is available.
+- Lazy preview loading, caching, retries and a limited request queue.
 
-- Telescope or lens name.
+The preview service first uses CDS HiPS2FITS sky cutouts where coordinates are available. Wikimedia Commons can be used as a fallback or for events without coordinates. A Commons result may be a related astronomy image rather than an exact image of the event, so the interface identifies the source. These previews are visual context, not guaranteed scientific observations of the event itself.
 
-- Focal length and aperture.
+Planning also requests a site forecast from [Open-Meteo](https://open-meteo.com/). The current summary covers the local 21:00–03:00 window and includes cloud cover, precipitation chance, wind, temperature, humidity and the air-to-dew-point gap. That gap is atmospheric context, not a dew sensor or a dew-control recommendation. This forecast does not provide transparency or seeing, and it cannot tell whether a cloud is directly along the line of sight to a selected target.
 
-- Camera name.
+The planner is an event and observing planner. It is not yet a full constraint-based imaging scheduler with custom horizons, mosaic jobs, filter-aware Moon constraints or automated capture windows.
 
-- Sensor width and height.
+### 5. Observe and experiment with hardware
 
-- Pixel size.
+Light from Afar has an early ASCOM Alpaca connection layer.
 
-- Mount type.
+In Settings, the user can enter the address and port of an Alpaca server and request its configured-device list. The discovered inventory can include device types such as mounts, cameras, focusers, filter wheels, rotators, domes, observing-conditions devices, safety monitors, cover calibrators and switches. Devices can be assigned to saved optical trains when the relevant type is supported by the selector.
 
-Those values feed the application's optical calculations and equipment guidance, including field of view, image scale and focal ratio.
+The current Observe workspace includes:
 
-The Settings panel also supports saved optical-train profiles. A train can be given a name and connected to discovered Alpaca device entries for an imaging camera, guide camera, focuser, filter wheel and rotator. You can save and activate different trains.
-
-This is an early device model, not yet a complete optical-train validator. Reducers, barlows, extenders, filter offsets, camera compatibility and all the physical relationships between components still need deeper work.
-
-### 4. Planning
-
-The Planning workspace is meant to connect upcoming sky events with the observer's actual location and equipment.
-
-The current event feed comes from **SpaceCatalog**. It includes event filtering for:
-
-- Meteor showers.
-
-- Eclipses.
-
-- Planetary events.
-
-- Deep-sky events.
-
-- All event types.
-
-The planner stores a local event cache so that previously loaded information can still be shown while the live service is unavailable. It calculates local altitude and azimuth from the observer coordinates and event position, and uses the available information to show useful context such as darkness, altitude, Moon separation and equipment suitability.
-
-Planning cards can include image previews. The source tries coordinate-based DSS2 cutouts through the CDS HiPS2FITS service when coordinates are available, and can fall back to a Wikimedia Commons search. Previews are lazy-loaded, cached, limited in concurrency and retried after failures. These images are visual context, not a guarantee that every fallback image is an exact photograph of the event.
-
-The planner also requests a site forecast from **Open-Meteo** for the 21:00–03:00 window. The current summary includes cloud cover, precipitation probability, wind, temperature, humidity and the air-to-dew-point gap.
-
-That last value is only weather context. It is not a dew sensor on the telescope. The current forecast does not provide the complete set of astrophotography variables such as seeing and transparency, and it cannot determine whether a cloud is directly along a particular target's line of sight.
-
-Plans are stored locally. You can save events to a plan, clear the saved plan and move planned events into the session-log workflow.
-
-### 5. Observe and hardware connection
-
-The Observe workspace is an early observatory-control layer built around **ASCOM Alpaca**.
-
-The Settings panel lets you enter a local Alpaca server address and port, then request its configured-device list through the management endpoint. Discovered devices are stored in the browser and can be assigned to an optical train.
-
-For a connected mount, the application can read available state such as:
-
-- Right ascension and declination.
-
-- Altitude and azimuth.
-
-- Tracking state.
-
-- Parked state.
-
-- Slewing state.
-
-- Pier side, when the driver provides it.
-
-The mount workflow includes connection, target slew, tracking activation and a slew-abort command. There is also a basic Sun-separation block before a target slew, plus a check that prevents a slew request while the mount reports that it is parked.
-
-For assigned imaging devices, the current source includes:
-
-- Camera connection.
-
-- Single light exposures.
-
-- Optional gain entry.
-
+- Mount connection and state refresh.
+- Telescope position and state reporting where the driver exposes those properties.
+- GoTo/slew to a selected target.
+- Abort-slew and stop controls.
+- Basic camera connection.
+- Single camera exposures with optional gain.
 - Exposure abort.
+- A simple multi-job capture sequence.
+- Basic focuser movement.
+- Basic filter-wheel position setting.
+- Basic rotator movement.
+- Guide-camera availability/state reporting.
+- A screen-awake option using the browser Screen Wake Lock API where supported.
 
-- Camera-state checks while an exposure runs.
+There are important limits here. The camera workflow starts exposures and checks camera state, but **the current app does not download the camera image array or act as a FITS capture/processing pipeline**. The sequence stores target, filter label, exposure, frame count and a dither interval, but the current runner does not yet issue filter-wheel changes or actual dithering. A requested dither is only reported in the status message because a guiding engine is not connected. The guide-camera panel can report device availability; it does not provide guiding, calibration or RMS tracking from a real guiding system. Autofocus, plate solving, meridian-flip automation and a complete recovery system are not implemented.
 
-- Focuser position commands.
+Alpaca is designed for observatory-network use. Do not expose an unsecured Alpaca server directly to the public internet. Use an appropriately secured local network, VPN or companion service. Hardware commands can move real equipment; check clearances, cable paths, mount limits and the physical environment yourself. The app's Sun-distance and below-horizon checks are basic safeguards, not a guarantee of physical safety.
 
-- Filter-wheel position commands.
+### 6. Keep a record of observing sessions
 
-- Rotator position commands.
-
-- Guide-camera availability checks.
-
-There is an important difference between a control being present and a complete imaging system being implemented. The guide-camera check does not provide a guiding engine or guiding RMS. The sequence editor can store target, filter, exposure, frame count and a requested dither interval, but the current code does not perform dithering; it reports that guiding control is not connected. The camera image array is not downloaded into Light from Afar after an exposure.
-
-The capture sequence can run exposure jobs on a compatible assigned camera, produce a local capture summary and pass that summary into the session log. It is a starting point for acquisition, not a mature unattended capture engine.
-
-**Hardware control is experimental and depends on the user's local Alpaca server, drivers, network configuration and device support.** A browser talking directly to a local Alpaca server is not a hardened remote-observatory architecture. Do not expose an Alpaca server directly to the public internet, and do not treat this build as an unattended safety system.
-
-### 6. Session Log
-
-The Session Log is where the night becomes a record rather than a collection of forgotten details.
-
-A session can include:
+The Session Log stores observing and imaging records in the browser. Entries can include:
 
 - Date and target.
-
-- Number of exposures.
-
-- Exposure duration.
-
+- Number of exposures and exposure duration.
 - Filter.
-
-- Observing site.
-
-- Notes.
-
+- Equipment/setup notes.
+- Capture conditions and free-form notes.
 - Seeing and transparency ratings.
+- Cloud-cover estimate.
+- Guiding RMS value when known.
 
-- Cloud cover.
+Sessions can be searched and edited. The app can export session data as CSV and export/import a JSON backup. A completed capture sequence can create a summary that can be used to start a session-log entry.
 
-- Guiding RMS, when known.
+The log also includes a "tonight" view that checks marked targets and planned events against darkness, altitude, Moon separation and the current setup. These calculations use approximate astronomical routines and the observer profile; they are intended as planning context, not precision ephemerides.
 
-- Equipment details available from the saved profile.
+### 7. Keep an image library
 
-Records can be searched, edited and exported to CSV. JSON backup export and import are also available. The log includes a view of tonight's marked targets and planned events, so the observer can connect the plan with what they actually did.
+Gallery is a local astrophotography library on the current device.
 
-The current log is mainly manual. Automatic FITS metadata extraction and a complete device-generated session record are future work.
-
-### 7. Gallery and Explore
-
-The local Gallery lets you add astrophotography images from your device and keep their details alongside them.
-
-Gallery records can contain:
-
-- Image.
+You can add images, search the library, view all photos or favorites, edit their details and delete entries. Each item can store information such as:
 
 - Title and target.
-
 - Capture date.
-
-- Telescope and camera.
-
-- Filter.
-
+- Telescope or lens.
+- Camera and filter.
 - Exposure per frame and total integration.
-
 - Tags.
-
 - Processing notes.
+- Capture notes and conditions.
 
-- Capture notes.
+Images are resized and compressed for browser storage. They are not a replacement for keeping the original files somewhere safe. Use the gallery export and your own backups for important images.
 
-- Favourite state.
+Explore is currently a presentation surface for a future public capture feed. The source can render items carrying a local published flag, but there is no complete online publishing service or public community feed connected yet. Friends, Chats and Connect are also placeholders. They do not create real groups, accounts, messages or online sessions.
 
-Images are resized and compressed in the browser before being stored locally. The Gallery has search and filtering for all photos and favourites, plus editing and deletion.
+### 8. Use it in the field
 
-Explore is the beginning of the discovery/community side of the project. In this build it can display locally stored captures that already carry the local published flag. It is **not** an online image-hosting service, and there is no connected public publishing backend yet.
+The layout adapts to smaller screens. On phones, the bottom bar keeps the main observing actions close at hand and the More drawer holds secondary tools such as surveys, marks, Gallery and Settings. A red night-vision layer can be toggled from the top bar to reduce bright blue/green interface light while observing. The Observe panel also has an optional Screen Wake Lock button so a supported browser can keep the display awake while the tab is visible.
 
-### 8. Habitable Zone calculator
+These are browser features, so availability depends on the device and browser. The mobile layout still needs testing on a range of real phones and tablets, especially with map gestures and connected hardware.
 
-The Habitable Zone calculator is a separate scientific utility inside the application. It is not part of the core imaging workflow, but I want it to remain available because astronomy is bigger than equipment control.
+### 9. Explore the habitable zone
 
-It accepts stellar luminosity and temperature, orbital distance, eccentricity and albedo. It calculates incident flux and equilibrium-temperature context, estimates conservative and optimistic habitable-zone boundaries, and displays an orbital flux graph with periastron, apastron, peak/minimum flux and the fraction of the orbit spent inside the conservative zone.
+The HZ Calculator is a separate scientific utility. It can use user-entered stellar and orbital values and includes a NASA Exoplanet Archive lookup path for planet data.
 
-There are built-in example planets and a live lookup path to the **NASA Exoplanet Archive**. The calculator is a screening model, not a habitability verdict. Atmospheres, clouds, planetary mass, geology, stellar activity and many other factors are not fully represented.
+The calculator estimates incident flux and habitable-zone boundaries, and visualizes orbital flux and time spent within the conservative habitable zone for the entered orbit. It is a simplified model with assumptions; being inside a calculated habitable zone does not establish that a planet is habitable.
 
-### 9. Accounts and profiles
+### 10. Accounts and profiles
 
-The public sky workspace can be used as a guest.
+The public sky workspace does not require an account.
 
-The separate authentication page is connected to **Supabase** in source and includes:
+The separate authentication page is wired to Supabase for:
 
 - Email/password registration and sign-in.
-
 - Google sign-in.
+- Email confirmation return handling.
+- Password-reset email requests.
+- Recovery-session-gated password updates.
+- Persistent Supabase browser sessions and sign-out.
+- Reading and updating the user's profile record.
 
-- Email confirmation return.
+The project includes a SQL file for the profile table, a new-user profile trigger and row-level security policies. These need to be applied and verified in the intended Supabase project. Google provider settings, redirect URLs and production email delivery also need live testing.
 
-- Password-reset email request.
+An online account currently covers authentication and profile information. **Marks, equipment, optical trains, plans, observing logs, settings and gallery items remain browser-local. They do not sync between devices.** The legacy local account data is retained for migration compatibility; it is not a cloud identity.
 
-- Password recovery with a verified recovery session.
+## What is not finished
 
-- Persistent browser auth session.
+I want the README to be clear about this, because a project like this can look more complete from screenshots than it really is.
 
-- Sign-out.
+The current build does not provide:
 
-- Display-name profile read/write.
+- Plate solving or image-based mount centering.
+- Camera image download, FITS ingestion or FITS metadata extraction.
+- A full capture engine with robust sequencing and recovery.
+- Real guiding, guide calibration or dithering.
+- Autofocus or automatic refocusing.
+- Complete filter-wheel and rotator workflows across all drivers.
+- A validated multi-device capability model for every Alpaca device.
+- A safety-monitor-driven observatory state machine.
+- Weather-triggered shutdown, roof/dome control or unattended operation.
+- A full mosaic planner.
+- A constraint-based multi-target imaging scheduler.
+- Cloud sync for marks, equipment, plans, logs or gallery.
+- A real public Explore feed.
+- Profile discovery, friend requests, groups, online sessions or chat.
+- A complete privacy policy, moderation/reporting system and account/data deletion workflow.
 
-- A profile table with row-level security policies in `supabase-profiles.sql`.
-
-Google provider setup, redirect allow-lists, email delivery and the database policies still need to be checked in the live Supabase project. The source being wired does not prove that the provider dashboard is configured correctly.
-
-The online account currently covers authentication and profile information. Marks, equipment, optical trains, plans, logs and Gallery images remain in the browser. **There is no cross-device application-data sync yet.**
-
-
-## What is not finished yet
-
-I keep this list visible because these are the things I do not want the project to pretend it can already do.
-
-- No plate-solving workflow.
-
-- No FITS ingestion, image-array download or automatic FITS metadata extraction.
-
-- No complete capture engine with reliable sequencing, retries and recovery.
-
-- No actual guiding engine, guide corrections or dithering.
-
-- No autofocus workflow.
-
-- No full camera cooling, ROI, binning or temperature-control interface.
-
-- No mature multi-device capability negotiation or compatibility validation.
-
-- No complete reducer/barlow/extender optical model.
-
-- No mosaic planner or automated multi-panel framing.
-
-- No custom horizon or obstruction model.
-
-- No full astronomical weather model for seeing, transparency, jet stream and sky quality.
-
-- No integrated weather safety monitor, watchdog, roof/dome automation or unattended recovery.
-
-- No remote-observatory security agent.
-
-- No cloud sync for marks, equipment, plans, logs or gallery images.
-
-- No real profile discovery, friend requests, groups, online sessions or chat.
-
-- No specialised planetary, lunar, solar, satellite, transient or exoplanet-transit imaging workflow.
-
-The Friends and Chats panels are placeholders. Connect is a presentation shell. Its tabs currently change the selected tab styling; they do not create or load real groups or sessions.
+Some controls and integrations are present as early experiments, but that is not the same as a mature, tested observatory system. In particular, the existence of a device control button does not mean every driver and physical setup has been tested.
 
 ## Where I want to take it
 
-The long-term idea is a connected astrophotography workspace.
+The longer roadmap follows the actual observing workflow rather than adding features just because other astronomy apps have them.
 
-The next stages I have in mind are:
+1. **Make the foundation dependable.** Improve optical trains, device capability discovery, mount state, abort handling and target-to-equipment context.
+2. **Connect the imaging process.** Add plate-solving, camera image retrieval, a proper capture engine, autofocus, guiding, dithering, filter handling and FITS metadata.
+3. **Treat observatory safety as part of the product.** Add environment devices, explicit safety states, watchdogs and tested recovery paths before supporting unattended sessions.
+4. **Make planning more realistic.** Add custom horizons, richer astronomical weather data, imaging constraints, mosaics and multi-target scheduling.
+5. **Build the community carefully.** Add opt-in profile discovery, friends, groups, shared sessions and messaging only after the database model, access rules, privacy and reporting tools are ready.
+6. **Support more kinds of astronomy.** Later work could include planetary, lunar and solar imaging, satellites, comets, transients and exoplanet-transit planning.
 
-1. **Make the foundation reliable.** Improve optical-train modelling, Alpaca discovery, device capabilities, mount state, abort behaviour and target-to-equipment framing.
+I do not want to turn AstraLog into a second PixInsight, N.I.N.A. or Ekos. Dedicated tools already do deep image processing and mature observatory automation. The opportunity here is to connect the map, target, equipment, conditions, planning and record into one understandable workflow, and to work alongside the tools that already do specialist jobs well.
 
-2. **Connect the imaging workflow.** Add plate solving, camera image handling, capture sequencing, focus, guiding, dithering, filter and rotator workflows.
+## Running it
 
-3. **Treat safety as part of the product.** Add explicit device states, limits, weather inputs, emergency handling and recovery. No unattended claims until this is properly tested.
+This is a static browser application. There is no build step required for the current source package.
 
-4. **Make planning more real.** Add custom horizons, richer weather information, imaging constraints and mosaic planning.
+1. Download or clone the repository.
+2. Serve the project folder from a local HTTP server. Do not open `index.html` using `file://`.
+3. Open `index.html` in a modern browser.
+4. The sky map and catalogue lookups need internet access. Some browser features and external services may behave differently on localhost and on the deployed HTTPS site.
 
-5. **Build the community carefully.** Start with privacy-aware profiles and permissions, then friends, groups and shared observing sessions. Chat comes after the access rules are solid.
-
-6. **Keep room for other kinds of astronomy.** Planetary, lunar, solar, transients, satellites and exoplanet transits can have their own workflows instead of being squeezed into one generic planner.
-
-I do not want to build features just because another application has them. I want each addition to fit the way people actually observe and image the sky.
-
-## Technology and services
-
-The current project is a browser application built with:
-
-- HTML, CSS and vanilla JavaScript.
-
-- Aladin Lite for the interactive sky map.
-
-- CDS HiPS surveys and HiPS2FITS for map imagery and planning previews.
-
-- Sesame / SIMBAD for astronomical object resolution and catalogue information.
-
-- SpaceCatalog for the event feed.
-
-- Open-Meteo for the current weather summary.
-
-- ASCOM Alpaca for local observatory-device communication.
-
-- Supabase Auth and a small profile table for account functionality.
-
-- NASA Exoplanet Archive TAP for the HZ calculator's planet lookup.
-
-- Wikimedia Commons as a fallback source for planning-card imagery.
-
-- A service worker for the application shell and local cache behaviour.
-
-The project does not currently use a frontend framework or a build step. The main application is `index.html`; `astralog.html` remains as a legacy redirect for older authentication return links.
-
-## Run it locally
-
-Do not open the HTML files directly with `file://`. Serve the folder over localhost.
-
-With Python installed, open a terminal in the project folder and run:
+For a quick local server with Python:
 
 ```bash
-
 python3 -m http.server 8000
-
 ```
 
-Then open:
+Then open `http://localhost:8000`.
 
-```text
+The authentication return URLs must also be allowed in the Supabase dashboard if you want to test registration, sign-in or password recovery locally.
 
-http://localhost:8000
+## Project files
 
-```
+| File | Purpose |
+|---|---|
+| `index.html` | Main sky workspace and application logic |
+| `astralog.css` | Main application styling and responsive layouts |
+| `auth.html` | Separate sign-in and registration page |
+| `auth.css` | Authentication page styling |
+| `auth-page.js` | Authentication page behavior and recovery flow |
+| `auth-config.js` | Supabase project URL and browser-safe publishable key |
+| `supabase-client.js` | Supabase client setup and auth-state handling |
+| `supabase-profiles.sql` | Profile table, trigger and row-level security setup |
+| `sw.js` | Service worker and application-shell cache |
+| `astralog.html` | Legacy redirect kept for older links |
+| `V34.5-PROJECT-AUDIT.md` and version notes | Historical audits, repair notes and validation boundaries |
 
-The sky map, catalogue lookups, planning feed, weather and authentication library need an internet connection. Hardware features additionally need a compatible local Alpaca server and drivers. The Alpaca server must allow browser requests from the page's origin.
-
-## Supabase setup
-
-Authentication needs a Supabase project.
-
-1. Open the Supabase SQL Editor and run `supabase-profiles.sql`.
-
-2. Check that `auth-config.js` contains the correct project URL and a browser-safe publishable key.
-
-3. In Supabase Auth URL Configuration, add the production site URL and the app return URLs for `index.html` and `auth.html?mode=recovery`.
-
-4. For local testing, allow the localhost URLs for the port you use.
-
-5. Enable email/password sign-up and configure email delivery. The default email service may not be suitable for production use.
-
-6. Enable Google in Supabase Auth and configure its client ID, secret and redirect settings in the provider dashboard. The Google provider callback belongs in the provider's redirect configuration; it is not the same as the app's return URL.
-
-7. Deploy over HTTPS and test registration, confirmation, sign-in, sign-out and password recovery on the actual domain.
-
-Never put a Supabase service-role key, OAuth client secret or private credential in browser code. The publishable key in `auth-config.js` is designed to be public; the database policies are still essential.
+The code still carries some AstraLog naming because that was the original workspace name and some storage keys and file names are kept for compatibility. The visible product name is Light from Afar.
 
 ## Data, privacy and backups
 
-Most application data is stored in the browser using `localStorage`. That includes marks, equipment settings, optical trains, saved plans, session records, Gallery items and interface preferences.
+Most application data is stored in `localStorage` on the current browser and device. Clearing site data can remove it. Export backups regularly if the data matters to you.
 
-This means:
+The current Supabase profile system does not synchronize observing data. Do not assume that a mark, equipment setup, plan, log entry or gallery image will be available on another browser or device.
 
-- Data belongs to the browser and origin where it was created.
+The observer profile can contain site coordinates. Treat those coordinates as private. The project does not currently provide a complete community privacy model because the community backend is not connected. Exact observing locations should never be exposed by default when community sharing is eventually implemented.
 
-- Clearing site data can erase it.
+External services receive requests needed for their features. These include Aladin/CDS sky surveys and image services, SIMBAD, SpaceCatalog, Open-Meteo, Wikimedia Commons, NASA Exoplanet Archive and Supabase. Their availability, terms and privacy practices are separate from this project.
 
-- Signing in on another device does not bring those records over.
+## Development notes and version history
 
-- JSON backup and CSV export should be used to keep copies of important records.
+This package is the **v34.13 recovery snapshot**. It includes the main application, authentication page, profile SQL, service worker and the historical repair notes that came with the project.
 
-- Gallery images are stored locally in browser storage, not uploaded to a Light from Afar server.
+Recent work has mainly been about keeping the map stable, making the target and planning workflows dependable, and being explicit about what is local versus online.
 
-Supabase currently stores account/authentication information and the profile fields handled by the profile code. It does not turn the local astronomy workspace into a cloud-synced account.
+- **v34.13:** repaired the HiPS survey identifier path and added migration handling for previously stored survey IDs. The shipped source should be treated as authoritative for the exact selectable survey list.
+- **v34.12:** restored the v34.9 map baseline and added map recovery after authentication navigation.
+- **v34.9:** restored the CDN-first Aladin loader with sequential fallbacks and source-specific diagnostics.
+- **v34.8–v34.4:** map initialization, survey switching, planning preview retries, gallery/navigation and mobile behavior repairs.
+- **v34.1–v34.3:** earlier planning image, layout, event and mark workflow repairs.
+- **v33–v34:** account-flow and Supabase authentication work, with local data kept separate from the online profile.
 
-A proper privacy policy, account deletion flow and broader security review are still needed before the community features become public services.
+The included version notes describe individual repairs in more detail. Static syntax checks and archive checks are not the same as live-browser testing. The current package has not been certified against every browser, every external service or real observatory hardware.
 
-## A note about the v34.13 archive
+## Contributing and getting involved
 
-This README follows the code that is actually present in the supplied recovery archive. There is a small mismatch between some historical changelog text and the shipped `index.html`: the current source defines three survey choices (DSS2 Color, 2MASS Color and Gaia DR3 RGB), and its survey switching uses the corresponding image-service URLs. Older notes mention a larger survey set and different identifier handling. The source in this archive is the authority for what this particular build exposes.
+I want Light from Afar to become something that other astronomy enthusiasts can contribute to, especially people interested in astrophotography, software, astronomy data and the practical side of observing.
 
-The archive also contains historical audit and repair notes. They are useful context, but they should not be read as proof that every external service or hardware path has been tested live.
+If you want to help, useful contributions include:
 
-## Development and testing
+- Testing the sky map and reporting reproducible survey or object-search problems.
+- Testing calculations against known examples and documenting their assumptions.
+- Improving accessibility and mobile field use.
+- Working on Alpaca device compatibility with real hardware.
+- Reviewing the data model and privacy boundaries before community features are added.
+- Suggesting improvements that make an observing session easier to plan, carry out or remember.
 
-This is a long-running project, and stability work is part of the development rather than something that happens after the features are finished.
+Please describe what you tested, which browser or hardware you used, and what actually happened. A clear bug report is more useful than saying something is broken without the steps to reproduce it.
 
-Static checks can catch syntax errors, duplicate IDs, broken references and packaging problems. They cannot prove that a CDN is reachable, that a WebGL canvas renders on a particular phone, that a Supabase provider is configured, or that a telescope driver behaves correctly.
+## License
 
-Before calling a feature reliable, it needs to be tested in the browser and, where hardware is involved, with the actual device. The v34.13 recovery archive has not been validated against every live external service or real observatory setup.
-
-## License and attribution
-
-The Aladin Lite attribution remains visible in the application. Keep the required Aladin logo/link and follow the library's distribution terms.
-
-This archive does not include a top-level `LICENSE` file. A project license should be chosen and added before treating the repository as an explicitly licensed open-source release.
-
-## One last thing
-
-I am building Light from Afar because I want to make something that I would genuinely use on a night outside with a telescope, and something that could eventually help other people feel less alone in this field.
-
-There is a lot left to do. That is part of the point. I want the project to grow carefully, keep its scientific side honest, and become more useful with every version.
-
-The light we collect has travelled farther than we can really imagine. I want the tools around that experience to feel worth building.
+This source snapshot does not include a `LICENSE` file, so no reuse or redistribution license is granted by this README. A license should be chosen and added to the repository before the project is distributed for reuse. Keep the Aladin Lite attribution visible and follow the terms of the external libraries and services used by the project.
